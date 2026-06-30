@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { useAuthStore } from '../store/authStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, Mail, Lock, School, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { LogIn, Mail, Lock, School, Eye, EyeOff, ShieldCheck, GraduationCap, UserCog } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Login() {
@@ -12,7 +12,10 @@ export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const [activeTab, setActiveTab] = useState('admin'); // 'admin' | 'siswa'
+
+    const { register: registerAdmin, handleSubmit: handleSubmitAdmin, formState: { errors: errorsAdmin } } = useForm();
+    const { register: registerSiswa, handleSubmit: handleSubmitSiswa, formState: { errors: errorsSiswa } } = useForm();
 
     const onSubmit = async (data) => {
         setIsLoading(true);
@@ -27,15 +30,20 @@ export default function Login() {
         }
     };
 
+    const tabs = [
+        { key: 'admin', label: 'Admin / Staff', icon: UserCog },
+        { key: 'siswa', label: 'Portal Siswa', icon: GraduationCap },
+    ];
+
     return (
         <div className="min-h-screen flex relative overflow-hidden" style={{ background: 'var(--bg-base)' }}>
 
-            {/* ── Left Panel (Decorative) ── */}
+            {/* ── Left Decorative Panel ── */}
             <div
                 className="hidden lg:flex flex-col justify-between w-[45%] flex-shrink-0 relative p-12 overflow-hidden"
                 style={{ background: 'linear-gradient(145deg, #0d1526 0%, #0a0f1e 100%)' }}
             >
-                {/* Animated glows */}
+                {/* Glows */}
                 <div className="absolute top-[-15%] left-[-10%] w-96 h-96 rounded-full blur-3xl opacity-40 pointer-events-none"
                     style={{ background: 'radial-gradient(circle, #6366f1 0%, transparent 70%)', animation: 'blob 8s infinite ease-in-out' }} />
                 <div className="absolute bottom-[-10%] right-[-5%] w-80 h-80 rounded-full blur-3xl opacity-30 pointer-events-none"
@@ -43,7 +51,7 @@ export default function Login() {
                 <div className="absolute top-[45%] left-[30%] w-64 h-64 rounded-full blur-3xl opacity-20 pointer-events-none"
                     style={{ background: 'radial-gradient(circle, #8b5cf6 0%, transparent 70%)', animation: 'blob 10s 3s infinite ease-in-out' }} />
 
-                {/* Dot grid pattern */}
+                {/* Dot grid */}
                 <div className="absolute inset-0 pointer-events-none"
                     style={{
                         backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
@@ -86,14 +94,13 @@ export default function Login() {
                         </span>
                     </h1>
                     <p className="text-sm leading-relaxed max-w-sm" style={{ color: 'rgba(148,163,184,0.75)' }}>
-                        Sistem administrasi sekolah terpadu yang membantu Anda mengelola data siswa, guru, keuangan, dan akademik dalam satu platform.
+                        Sistem administrasi sekolah terpadu untuk mengelola data siswa, guru, keuangan, dan akademik dalam satu platform.
                     </p>
 
-                    {/* Feature badges */}
                     <div className="mt-8 space-y-3">
                         {[
                             { icon: '📊', text: 'Dashboard analitik real-time' },
-                            { icon: '👨‍🎓', text: 'Manajemen siswa & guru terintegrasi' },
+                            { icon: '👨‍🎓', text: 'Portal siswa & laporan nilai' },
                             { icon: '💳', text: 'Pengelolaan SPP & keuangan otomatis' },
                         ].map((f, i) => (
                             <div key={i} className="flex items-center gap-3">
@@ -107,7 +114,6 @@ export default function Login() {
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="relative z-10">
                     <p className="text-xs" style={{ color: 'rgba(100,116,139,0.55)' }}>
                         © {new Date().getFullYear()} {appSettings?.school_name || 'EduAdmin'} · Hak cipta dilindungi
@@ -135,19 +141,16 @@ export default function Login() {
                         borderRadius: '24px',
                     }}
                 >
-                    {/* Top shimmer line */}
+                    {/* Top shimmer */}
                     <div className="absolute top-0 left-8 right-8 h-px"
-                        style={{ background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.7), rgba(6,182,212,0.7), transparent)' }} />
-
-                    {/* Corner accent */}
-                    <div className="absolute top-0 right-0 w-32 h-32 pointer-events-none overflow-hidden rounded-tr-3xl">
-                        <div className="absolute top-0 right-0 w-16 h-16 rounded-bl-full opacity-20"
-                            style={{ background: 'linear-gradient(135deg, #6366f1, #06b6d4)' }} />
-                    </div>
+                        style={{ background: activeTab === 'admin'
+                            ? 'linear-gradient(90deg, transparent, rgba(99,102,241,0.7), rgba(6,182,212,0.7), transparent)'
+                            : 'linear-gradient(90deg, transparent, rgba(6,182,212,0.7), rgba(16,185,129,0.7), transparent)'
+                        }} />
 
                     <div className="p-8">
 
-                        {/* Mobile brand logo */}
+                        {/* Mobile brand */}
                         <div className="lg:hidden flex justify-center mb-6">
                             <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden"
                                 style={{
@@ -162,136 +165,225 @@ export default function Login() {
                             </div>
                         </div>
 
+                        {/* ── Tab Switcher ── */}
+                        <div className="flex rounded-xl p-1 mb-6"
+                            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)' }}>
+                            {tabs.map((tab) => {
+                                const Icon = tab.icon;
+                                const isActive = activeTab === tab.key;
+                                return (
+                                    <button
+                                        key={tab.key}
+                                        onClick={() => { setActiveTab(tab.key); setErrorMsg(''); setShowPassword(false); }}
+                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs font-bold transition-all duration-200"
+                                        style={{
+                                            background: isActive
+                                                ? tab.key === 'admin'
+                                                    ? 'linear-gradient(135deg, rgba(99,102,241,0.25), rgba(6,182,212,0.15))'
+                                                    : 'linear-gradient(135deg, rgba(6,182,212,0.25), rgba(16,185,129,0.15))'
+                                                : 'transparent',
+                                            color: isActive
+                                                ? tab.key === 'admin' ? '#a5b4fc' : '#67e8f9'
+                                                : 'var(--text-muted)',
+                                            border: isActive
+                                                ? tab.key === 'admin'
+                                                    ? '1px solid rgba(99,102,241,0.3)'
+                                                    : '1px solid rgba(6,182,212,0.3)'
+                                                : '1px solid transparent',
+                                        }}
+                                    >
+                                        <Icon size={14} />
+                                        {tab.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
                         {/* Heading */}
-                        <div className="mb-8">
-                            <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                                Selamat Datang 👋
-                            </h2>
-                            <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-                                Masuk untuk mengakses panel administrasi
-                            </p>
+                        <div className="mb-6">
+                            {activeTab === 'admin' ? (
+                                <>
+                                    <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                                        Selamat Datang 👋
+                                    </h2>
+                                    <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+                                        Masuk sebagai Admin atau Staff
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                                        Portal Siswa 🎓
+                                    </h2>
+                                    <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+                                        Masuk untuk melihat nilai, jadwal & SPP
+                                    </p>
+                                </>
+                            )}
                         </div>
 
                         {/* Error Alert */}
                         {errorMsg && (
-                            <div
-                                className="mb-5 flex items-start gap-3 px-4 py-3 rounded-xl text-sm"
+                            <div className="mb-5 flex items-start gap-3 px-4 py-3 rounded-xl text-sm"
                                 style={{
                                     background: 'rgba(239,68,68,0.08)',
                                     border: '1px solid rgba(239,68,68,0.2)',
                                     color: '#f87171',
-                                }}
-                            >
+                                }}>
                                 <span className="mt-0.5 flex-shrink-0">⚠️</span>
                                 <span>{errorMsg}</span>
                             </div>
                         )}
 
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" autoComplete="off">
-                            {/* Email */}
-                            <div>
-                                <label className="block text-xs font-semibold mb-2 uppercase tracking-wider"
-                                    style={{ color: 'var(--text-label)' }}>
-                                    Email
-                                </label>
-                                <div className="relative">
-                                    <Mail size={15}
-                                        className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                                        style={{ color: errors.email ? '#f87171' : 'rgba(99,102,241,0.7)' }}
-                                    />
-                                    <input
-                                        type="email"
-                                        {...register('email', { required: 'Email wajib diisi' })}
-                                        className="input-dark pl-10 w-full"
-                                        placeholder="Masukkan email Anda"
-                                        autoComplete="off"
-                                        style={errors.email ? { borderColor: 'rgba(239,68,68,0.5)' } : {}}
-                                    />
+                        {/* ── Admin Form ── */}
+                        {activeTab === 'admin' && (
+                            <form onSubmit={handleSubmitAdmin(onSubmit)} className="space-y-5" autoComplete="off">
+                                <div>
+                                    <label className="block text-xs font-semibold mb-2 uppercase tracking-wider"
+                                        style={{ color: 'var(--text-label)' }}>Email</label>
+                                    <div className="relative">
+                                        <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                                            style={{ color: errorsAdmin.email ? '#f87171' : 'rgba(99,102,241,0.7)' }} />
+                                        <input
+                                            type="email"
+                                            {...registerAdmin('email', { required: 'Email wajib diisi' })}
+                                            className="input-dark pl-10 w-full"
+                                            placeholder="Email admin / staff"
+                                            autoComplete="off"
+                                            style={errorsAdmin.email ? { borderColor: 'rgba(239,68,68,0.5)' } : {}}
+                                        />
+                                    </div>
+                                    {errorsAdmin.email && <p className="text-xs mt-1.5" style={{ color: '#f87171' }}>{errorsAdmin.email.message}</p>}
                                 </div>
-                                {errors.email && (
-                                    <p className="text-xs mt-1.5" style={{ color: '#f87171' }}>{errors.email.message}</p>
-                                )}
-                            </div>
 
-                            {/* Password */}
-                            <div>
-                                <label className="block text-xs font-semibold mb-2 uppercase tracking-wider"
-                                    style={{ color: 'var(--text-label)' }}>
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <Lock size={15}
-                                        className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                                        style={{ color: errors.password ? '#f87171' : 'rgba(99,102,241,0.7)' }}
-                                    />
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        {...register('password', { required: 'Password wajib diisi' })}
-                                        className="input-dark pl-10 pr-10 w-full"
-                                        placeholder="Masukkan password Anda"
-                                        autoComplete="new-password"
-                                        style={errors.password ? { borderColor: 'rgba(239,68,68,0.5)' } : {}}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors"
-                                        style={{ color: 'var(--text-muted)' }}
-                                        onMouseEnter={e => e.currentTarget.style.color = '#a5b4fc'}
-                                        onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
-                                    >
-                                        {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                                    </button>
+                                <div>
+                                    <label className="block text-xs font-semibold mb-2 uppercase tracking-wider"
+                                        style={{ color: 'var(--text-label)' }}>Password</label>
+                                    <div className="relative">
+                                        <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                                            style={{ color: errorsAdmin.password ? '#f87171' : 'rgba(99,102,241,0.7)' }} />
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            {...registerAdmin('password', { required: 'Password wajib diisi' })}
+                                            className="input-dark pl-10 pr-10 w-full"
+                                            placeholder="Password Anda"
+                                            autoComplete="new-password"
+                                            style={errorsAdmin.password ? { borderColor: 'rgba(239,68,68,0.5)' } : {}}
+                                        />
+                                        <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors"
+                                            style={{ color: 'var(--text-muted)' }}
+                                            onMouseEnter={e => e.currentTarget.style.color = '#a5b4fc'}
+                                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>
+                                            {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                                        </button>
+                                    </div>
+                                    {errorsAdmin.password && <p className="text-xs mt-1.5" style={{ color: '#f87171' }}>{errorsAdmin.password.message}</p>}
                                 </div>
-                                {errors.password && (
-                                    <p className="text-xs mt-1.5" style={{ color: '#f87171' }}>{errors.password.message}</p>
-                                )}
-                            </div>
 
-                            {/* Submit */}
-                            <button
-                                type="submit"
-                                id="btn-login"
-                                disabled={isLoading}
-                                className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl font-bold text-white text-sm transition-all duration-200 mt-2"
-                                style={{
-                                    background: isLoading
-                                        ? 'rgba(99,102,241,0.5)'
-                                        : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #06b6d4 100%)',
-                                    boxShadow: isLoading ? 'none' : '0 4px 20px rgba(99,102,241,0.4)',
-                                    transform: isLoading ? 'none' : undefined,
-                                }}
-                                onMouseEnter={e => {
-                                    if (!isLoading) {
-                                        e.currentTarget.style.transform = 'translateY(-1px)';
-                                        e.currentTarget.style.boxShadow = '0 8px 28px rgba(99,102,241,0.55)';
-                                    }
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(99,102,241,0.4)';
-                                }}
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10"
-                                                stroke="currentColor" strokeWidth="4" />
+                                <button type="submit" id="btn-login-admin" disabled={isLoading}
+                                    className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl font-bold text-white text-sm transition-all duration-200"
+                                    style={{
+                                        background: isLoading ? 'rgba(99,102,241,0.5)' : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #06b6d4 100%)',
+                                        boxShadow: isLoading ? 'none' : '0 4px 20px rgba(99,102,241,0.4)',
+                                    }}
+                                    onMouseEnter={e => { if (!isLoading) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(99,102,241,0.55)'; } }}
+                                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(99,102,241,0.4)'; }}
+                                >
+                                    {isLoading ? (
+                                        <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                                        </svg>
-                                        Memverifikasi...
-                                    </>
-                                ) : (
-                                    <>
-                                        <LogIn size={16} />
-                                        Masuk ke Dashboard
-                                    </>
-                                )}
-                            </button>
-                        </form>
+                                        </svg> Memverifikasi...</>
+                                    ) : (
+                                        <><LogIn size={16} /> Masuk ke Dashboard</>
+                                    )}
+                                </button>
+                            </form>
+                        )}
+
+                        {/* ── Siswa Form ── */}
+                        {activeTab === 'siswa' && (
+                            <form onSubmit={handleSubmitSiswa(onSubmit)} className="space-y-5" autoComplete="off">
+                                {/* Info banner */}
+                                <div className="flex items-start gap-3 px-4 py-3 rounded-xl text-xs"
+                                    style={{
+                                        background: 'rgba(6,182,212,0.08)',
+                                        border: '1px solid rgba(6,182,212,0.2)',
+                                        color: '#67e8f9',
+                                    }}>
+                                    <GraduationCap size={15} className="flex-shrink-0 mt-0.5" />
+                                    <span>Gunakan email dan password yang diberikan oleh pihak sekolah untuk masuk ke portal siswa.</span>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold mb-2 uppercase tracking-wider"
+                                        style={{ color: 'var(--text-label)' }}>Email Siswa</label>
+                                    <div className="relative">
+                                        <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                                            style={{ color: errorsSiswa.email ? '#f87171' : 'rgba(6,182,212,0.7)' }} />
+                                        <input
+                                            type="email"
+                                            {...registerSiswa('email', { required: 'Email wajib diisi' })}
+                                            className="input-dark pl-10 w-full"
+                                            placeholder="email.siswa@sekolah.id"
+                                            autoComplete="off"
+                                            style={{
+                                                ...(errorsSiswa.email ? { borderColor: 'rgba(239,68,68,0.5)' } : {}),
+                                            }}
+                                        />
+                                    </div>
+                                    {errorsSiswa.email && <p className="text-xs mt-1.5" style={{ color: '#f87171' }}>{errorsSiswa.email.message}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold mb-2 uppercase tracking-wider"
+                                        style={{ color: 'var(--text-label)' }}>Password</label>
+                                    <div className="relative">
+                                        <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                                            style={{ color: errorsSiswa.password ? '#f87171' : 'rgba(6,182,212,0.7)' }} />
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            {...registerSiswa('password', { required: 'Password wajib diisi' })}
+                                            className="input-dark pl-10 pr-10 w-full"
+                                            placeholder="Password siswa"
+                                            autoComplete="new-password"
+                                            style={errorsSiswa.password ? { borderColor: 'rgba(239,68,68,0.5)' } : {}}
+                                        />
+                                        <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors"
+                                            style={{ color: 'var(--text-muted)' }}
+                                            onMouseEnter={e => e.currentTarget.style.color = '#67e8f9'}
+                                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>
+                                            {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                                        </button>
+                                    </div>
+                                    {errorsSiswa.password && <p className="text-xs mt-1.5" style={{ color: '#f87171' }}>{errorsSiswa.password.message}</p>}
+                                </div>
+
+                                <button type="submit" id="btn-login-siswa" disabled={isLoading}
+                                    className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl font-bold text-white text-sm transition-all duration-200"
+                                    style={{
+                                        background: isLoading ? 'rgba(6,182,212,0.4)' : 'linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #10b981 100%)',
+                                        boxShadow: isLoading ? 'none' : '0 4px 20px rgba(6,182,212,0.4)',
+                                    }}
+                                    onMouseEnter={e => { if (!isLoading) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(6,182,212,0.55)'; } }}
+                                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(6,182,212,0.4)'; }}
+                                >
+                                    {isLoading ? (
+                                        <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                        </svg> Memverifikasi...</>
+                                    ) : (
+                                        <><GraduationCap size={16} /> Masuk ke Portal Siswa</>
+                                    )}
+                                </button>
+                            </form>
+                        )}
 
                         {/* Footer */}
-                        <div className="mt-8 pt-6" style={{ borderTop: '1px solid var(--border)' }}>
+                        <div className="mt-7 pt-5" style={{ borderTop: '1px solid var(--border)' }}>
                             <p className="text-center text-xs" style={{ color: 'var(--text-muted)' }}>
                                 © {new Date().getFullYear()} {appSettings?.school_name || 'EduAdmin'} &nbsp;·&nbsp; Seluruh hak dilindungi
                             </p>
