@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+﻿import { useForm } from 'react-hook-form';
 import { useAuthStore } from '../store/authStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { useNavigate } from 'react-router-dom';
@@ -38,7 +38,7 @@ export default function Login() {
     return (
         <div className="min-h-screen flex relative overflow-hidden" style={{ background: 'var(--bg-base)' }}>
 
-            {/* ── Left Decorative Panel ── */}
+            {/* â”€â”€ Left Decorative Panel â”€â”€ */}
             <div
                 className="hidden lg:flex flex-col justify-between w-[45%] flex-shrink-0 relative p-12 overflow-hidden"
                 style={{ background: 'linear-gradient(145deg, #0d1526 0%, #0a0f1e 100%)' }}
@@ -64,7 +64,7 @@ export default function Login() {
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0"
                             style={{ background: 'linear-gradient(135deg, #6366f1, #06b6d4)', boxShadow: '0 4px 16px rgba(99,102,241,0.4)' }}>
                             {appSettings?.app_logo ? (
-                                <img src={`https://api.niswa.online${appSettings.app_logo}`} alt="Logo" className="w-full h-full object-cover" />
+                                <img src={`${import.meta.env.VITE_API_BASE_URL || ""}${appSettings.app_logo}`} alt="Logo" className="w-full h-full object-cover" />
                             ) : (
                                 <School size={20} className="text-white" />
                             )}
@@ -99,9 +99,9 @@ export default function Login() {
 
                     <div className="mt-8 space-y-3">
                         {[
-                            { icon: '📊', text: 'Dashboard analitik real-time' },
-                            { icon: '👨‍🎓', text: 'Portal siswa & laporan nilai' },
-                            { icon: '💳', text: 'Pengelolaan SPP & keuangan otomatis' },
+                            { icon: 'ðŸ“Š', text: 'Dashboard analitik real-time' },
+                            { icon: 'ðŸ‘¨â€ðŸŽ“', text: 'Portal siswa & laporan nilai' },
+                            { icon: 'ðŸ’³', text: 'Pengelolaan SPP & keuangan otomatis' },
                         ].map((f, i) => (
                             <div key={i} className="flex items-center gap-3">
                                 <span className="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
@@ -116,12 +116,12 @@ export default function Login() {
 
                 <div className="relative z-10">
                     <p className="text-xs" style={{ color: 'rgba(100,116,139,0.55)' }}>
-                        © {new Date().getFullYear()} {appSettings?.school_name || 'EduAdmin'} · Hak cipta dilindungi
+                        Â© {new Date().getFullYear()} {appSettings?.school_name || 'EduAdmin'} Â· Hak cipta dilindungi
                     </p>
                 </div>
             </div>
 
-            {/* ── Right Panel (Login Form) ── */}
+            {/* â”€â”€ Right Panel (Login Form) â”€â”€ */}
             <div className="flex-1 flex items-center justify-center p-6 relative">
 
                 {/* Mobile blobs */}
@@ -158,14 +158,14 @@ export default function Login() {
                                     boxShadow: '0 8px 24px rgba(99,102,241,0.4)',
                                 }}>
                                 {appSettings?.app_logo ? (
-                                    <img src={`https://api.niswa.online${appSettings.app_logo}`} alt="Logo" className="w-full h-full object-cover" />
+                                    <img src={`${import.meta.env.VITE_API_BASE_URL || ""}${appSettings.app_logo}`} alt="Logo" className="w-full h-full object-cover" />
                                 ) : (
                                     <School size={26} className="text-white" />
                                 )}
                             </div>
                         </div>
 
-                        {/* ── Tab Switcher ── */}
+                        {/* â”€â”€ Tab Switcher â”€â”€ */}
                         <div className="flex rounded-xl p-1 mb-6"
                             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)' }}>
                             {tabs.map((tab) => {
@@ -204,7 +204,7 @@ export default function Login() {
                             {activeTab === 'admin' ? (
                                 <>
                                     <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                                        Selamat Datang 👋
+                                        Selamat Datang ðŸ‘‹
                                     </h2>
                                     <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
                                         Masuk sebagai Admin atau Staff
@@ -213,7 +213,7 @@ export default function Login() {
                             ) : (
                                 <>
                                     <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                                        Portal Siswa 🎓
+                                        Portal Siswa ðŸŽ“
                                     </h2>
                                     <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
                                         Masuk untuk melihat nilai, jadwal & SPP
@@ -230,12 +230,12 @@ export default function Login() {
                                     border: '1px solid rgba(239,68,68,0.2)',
                                     color: '#f87171',
                                 }}>
-                                <span className="mt-0.5 flex-shrink-0">⚠️</span>
+                                <span className="mt-0.5 flex-shrink-0">âš ï¸</span>
                                 <span>{errorMsg}</span>
                             </div>
                         )}
 
-                        {/* ── Admin Form ── */}
+                        {/* â”€â”€ Admin Form â”€â”€ */}
                         {activeTab === 'admin' && (
                             <form onSubmit={handleSubmitAdmin(onSubmit)} className="space-y-5" autoComplete="off">
                                 <div>
@@ -302,7 +302,7 @@ export default function Login() {
                             </form>
                         )}
 
-                        {/* ── Siswa Form ── */}
+                        {/* â”€â”€ Siswa Form â”€â”€ */}
                         {activeTab === 'siswa' && (
                             <form onSubmit={handleSubmitSiswa(onSubmit)} className="space-y-5" autoComplete="off">
                                 {/* Info banner */}
@@ -385,7 +385,7 @@ export default function Login() {
                         {/* Footer */}
                         <div className="mt-7 pt-5" style={{ borderTop: '1px solid var(--border)' }}>
                             <p className="text-center text-xs" style={{ color: 'var(--text-muted)' }}>
-                                © {new Date().getFullYear()} {appSettings?.school_name || 'EduAdmin'} &nbsp;·&nbsp; Seluruh hak dilindungi
+                                Â© {new Date().getFullYear()} {appSettings?.school_name || 'EduAdmin'} &nbsp;Â·&nbsp; Seluruh hak dilindungi
                             </p>
                         </div>
                     </div>
@@ -394,3 +394,4 @@ export default function Login() {
         </div>
     );
 }
+

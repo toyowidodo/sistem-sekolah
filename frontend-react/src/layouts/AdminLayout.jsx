@@ -111,7 +111,7 @@ export default function AdminLayout() {
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
                         style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)' }}>
                         {appSettings?.app_logo ? (
-                            <img src={`https://api.niswa.online${appSettings.app_logo}`} alt="Logo" className="w-full h-full object-cover" />
+                            <img src={`${import.meta.env.VITE_API_BASE_URL || ''}${appSettings.app_logo}`} alt="Logo" className="w-full h-full object-cover" />
                         ) : (
                             <School size={16} className="text-white" />
                         )}

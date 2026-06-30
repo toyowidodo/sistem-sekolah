@@ -1,0 +1,27 @@
+# ─── OS Files ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Build artifacts & ZIP ───────────────────────────────────────
+*.zip
+*.tar.gz
+*.rar
+
+# ─── IDE & Editor ────────────────────────────────────────────────
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+.vs/
+
+# ─── Logs ────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ─── Recovery & Temp Scripts ─────────────────────────────────────
+recover*.cjs
+split_*.cjs
+recovered_*.jsx
