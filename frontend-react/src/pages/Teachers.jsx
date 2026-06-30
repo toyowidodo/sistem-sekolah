@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import api from '../api/axios';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
-import { Edit, Trash2, PlusCircle, GraduationCap } from 'lucide-react';
+import { Edit, Trash2, PlusCircle, GraduationCap, Download, FileText, Upload } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useForm } from 'react-hook-form';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const labelClass = "block text-xs font-semibold uppercase tracking-wider mb-1.5";
 const labelStyle = { color: 'var(--text-label)' };
@@ -13,6 +15,7 @@ export default function Teachers() {
     const [teachers, setTeachers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    const fileInputRef = useRef(null);
 
     const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
@@ -76,6 +79,117 @@ export default function Teachers() {
         });
     };
 
+    // ── Export Excel ──
+    const handleExportExcel = async () => {
+        try {
+            const res = await api.get('/teachers/export/excel', { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'data-guru.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch {
+            Swal.fire({ title: 'Error', text: 'Gagal export Excel', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+        }
+    };
+
+    // ── Export PDF ──
+    const handleExportPDF = () => {
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+        doc.setFillColor(15, 23, 42);
+        doc.rect(0, 0, 297, 28, 'F');
+        doc.setFontSize(16);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text('LAPORAN DATA GURU & STAFF', 148, 12, { align: 'center' });
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(148, 163, 184);
+        doc.text(
+            `Dicetak pada: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`,
+            148, 21, { align: 'center' }
+        );
+
+        autoTable(doc, {
+            startY: 34,
+            head: [['No', 'NIP', 'Nama Guru', 'Jabatan', 'Mata Pelajaran', 'Pendidikan', 'No HP']],
+            body: teachers.map((t, i) => [
+                i + 1,
+                t.nip || '-',
+                t.name || '-',
+                t.position || '-',
+                t.subject || '-',
+                t.education || '-',
+                t.phone || '-',
+            ]),
+            headStyles: { fillColor: [6, 182, 212], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9, halign: 'center' },
+            bodyStyles: { fontSize: 8, textColor: [30, 41, 59] },
+            alternateRowStyles: { fillColor: [241, 245, 249] },
+            margin: { left: 10, right: 10 },
+            styles: { overflow: 'linebreak', cellPadding: 3 },
+            didDrawPage: (data) => {
+                const pageCount = doc.internal.getNumberOfPages();
+                doc.setFontSize(7);
+                doc.setTextColor(148, 163, 184);
+                doc.text(
+                    `Halaman ${data.pageNumber} dari ${pageCount}  •  Total: ${teachers.length} Guru`,
+                    148, doc.internal.pageSize.height - 5, { align: 'center' }
+                );
+            },
+        });
+
+        doc.save(`Data-Guru-${new Date().toISOString().slice(0, 10)}.pdf`);
+    };
+
+    // ── Import Excel ──
+    const handleImportExcel = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        Swal.fire({
+            title: 'Mengunggah...',
+            text: 'Harap tunggu, sistem sedang memproses data guru',
+            allowOutsideClick: false,
+            background: '#0d1526',
+            color: '#e2e8f0',
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        try {
+            await api.post('/teachers/import', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            Swal.fire({ title: 'Berhasil!', text: 'Data guru berhasil diunggah', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+            fetchTeachers();
+        } catch (err) {
+            Swal.fire({ title: 'Gagal', text: err.response?.data?.message || 'Gagal mengunggah data', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+        }
+
+        e.target.value = null;
+    };
+
+    // ── Download Template ──
+    const handleDownloadTemplate = async () => {
+        try {
+            const res = await api.get('/teachers/import/template', { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'template-import-guru.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch {
+            Swal.fire({ title: 'Error', text: 'Gagal mengunduh template', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+        }
+    };
+
     const actionBtn = (bg, color, border, hoverBg, icon, onClick, title) => (
         <button
             onClick={onClick}
@@ -136,9 +250,42 @@ export default function Teachers() {
                         </p>
                     </div>
                 </div>
-                <button onClick={openCreateModal} id="btn-tambah-guru" className="btn-primary">
-                    <PlusCircle size={15} /> Tambah Guru
-                </button>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 flex-wrap">
+                    <button onClick={handleExportPDF} className="btn-ghost" title="Export ke PDF">
+                        <FileText size={15} /> Export PDF
+                    </button>
+                    <button onClick={handleExportExcel} className="btn-success" title="Export ke Excel">
+                        <Download size={15} /> Export Excel
+                    </button>
+                    <input
+                        type="file"
+                        accept=".csv,.xlsx,.xls"
+                        ref={fileInputRef}
+                        onChange={handleImportExcel}
+                        className="hidden"
+                    />
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="btn-ghost"
+                        title="Import dari CSV/Excel"
+                        style={{ border: '1px solid var(--border)', background: 'rgba(99,102,241,0.1)', color: '#818cf8' }}
+                    >
+                        <Upload size={15} /> Import CSV/Excel
+                    </button>
+                    <button
+                        onClick={handleDownloadTemplate}
+                        className="btn-ghost"
+                        title="Unduh template import"
+                        style={{ border: '1px solid var(--border)', background: 'var(--bg-input)' }}
+                    >
+                        Unduh Template
+                    </button>
+                    <button onClick={openCreateModal} id="btn-tambah-guru" className="btn-primary">
+                        <PlusCircle size={15} /> Tambah Guru
+                    </button>
+                </div>
             </div>
 
             <DataTable columns={columns} data={teachers} />

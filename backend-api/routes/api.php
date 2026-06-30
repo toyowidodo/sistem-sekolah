@@ -57,6 +57,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Modul Guru
     Route::middleware('permission:manage-teachers')->group(function () {
+        Route::get('teachers/import/template', [TeacherController::class, 'downloadTemplate']);
+        Route::post('teachers/import', [TeacherController::class, 'importExcel']);
+        Route::get('teachers/export/excel', [TeacherController::class, 'exportExcel']);
         Route::apiResource('teachers', TeacherController::class);
     });
 

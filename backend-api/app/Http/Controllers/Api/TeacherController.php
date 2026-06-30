@@ -53,4 +53,37 @@ class TeacherController extends Controller
         $this->teacherService->delete($id);
         return response()->json(['message' => 'Guru berhasil dihapus'], 200);
     }
+
+    public function exportExcel()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\TeachersExport,
+            'data-guru.xlsx'
+        );
+    }
+
+    public function downloadTemplate()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\TeacherTemplateExport,
+            'template-import-guru.xlsx'
+        );
+    }
+
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:csv,xls,xlsx'
+        ]);
+
+        try {
+            \Maatwebsite\Excel\Facades\Excel::import(
+                new \App\Imports\TeachersImport,
+                $request->file('file')
+            );
+            return response()->json(['message' => 'Data guru berhasil diimport'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Gagal mengimport data: ' . $e->getMessage()], 500);
+        }
+    }
 }
