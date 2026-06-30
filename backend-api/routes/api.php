@@ -23,6 +23,14 @@ use App\Http\Controllers\Api\SettingController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/public-settings', function() {
+    return response()->json([
+        'school_name' => \App\Models\Setting::where('key', 'school_name')->value('value') ?: 'EduAdmin',
+        'school_subtitle' => \App\Models\Setting::where('key', 'school_subtitle')->value('value') ?: 'School System',
+        'app_logo' => \App\Models\Setting::where('key', 'app_logo')->value('value') ?: null,
+    ]);
+});
+
 Route::middleware('auth:sanctum')->group(function () {
     
     Route::get('/me', [AuthController::class, 'me']);

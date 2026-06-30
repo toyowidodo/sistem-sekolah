@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react';
-import { Settings, Save, Building, Phone, Mail, MapPin, Calendar, BookOpen } from 'lucide-react';
+import { Settings, Save, Building, Phone, Mail, MapPin, Calendar, BookOpen, Image as ImageIcon } from 'lucide-react';
 import api from '../../../api/axios';
 import { swal } from './Shared';
 import ModernSelect from '../../../components/ModernSelect';
+import { useSettingsStore } from '../../../store/settingsStore';
 
 export default function TabSettings() {
+    const { fetchPublicSettings } = useSettingsStore();
     const [settings, setSettings] = useState({
         school_name: '',
+        school_subtitle: '',
         school_address: '',
         school_phone: '',
         school_email: '',
         active_academic_year: '',
         active_semester: '',
     });
+    const [logoFile, setLogoFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -34,8 +38,21 @@ export default function TabSettings() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            await api.post('/settings', settings);
+            const formData = new FormData();
+            Object.keys(settings).forEach(key => {
+                if (settings[key] !== null && settings[key] !== undefined) {
+                    formData.append(key, settings[key]);
+                }
+            });
+            if (logoFile) {
+                formData.append('app_logo', logoFile);
+            }
+
+            await api.post('/settings', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
             swal({ title: 'Sukses!', text: 'Pengaturan sistem berhasil diperbarui.', icon: 'success' });
+            fetchPublicSettings();
         } catch (err) {
             swal({ title: 'Gagal', text: 'Terjadi kesalahan saat menyimpan pengaturan.', icon: 'error' });
         } finally {
@@ -79,6 +96,29 @@ export default function TabSettings() {
                                     </div>
                                     <input type="text" name="school_name" value={settings.school_name || ''} onChange={handleChange} required
                                         className="w-full pl-9 pr-3 py-2 rounded-xl text-sm transition-colors"
+                                        style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }} />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>Subjudul Aplikasi (Slogan)</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Building size={15} className="text-gray-400" />
+                                    </div>
+                                    <input type="text" name="school_subtitle" value={settings.school_subtitle || ''} onChange={handleChange}
+                                        className="w-full pl-9 pr-3 py-2 rounded-xl text-sm transition-colors"
+                                        placeholder="Sistem Administrasi Sekolah"
+                                        style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }} />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>Logo Aplikasi</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <ImageIcon size={15} className="text-gray-400" />
+                                    </div>
+                                    <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files[0])}
+                                        className="w-full pl-9 pr-3 py-1.5 rounded-xl text-sm transition-colors"
                                         style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }} />
                                 </div>
                             </div>

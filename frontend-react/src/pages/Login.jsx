@@ -1,11 +1,13 @@
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '../store/authStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock, School } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Login() {
     const login = useAuthStore((state) => state.login);
+    const { appSettings } = useSettingsStore();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
@@ -76,22 +78,19 @@ export default function Login() {
                                 boxShadow: '0 8px 24px rgba(99,102,241,0.4)',
                             }}
                         >
-                            {/* Jika Anda punya logo asli, ganti bagian ini. Pastikan logo bernama 'logo.png' dan letakkan di folder public. */}
-                            <img 
-                                src="/logo.png" 
-                                alt="Logo Sekolah" 
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                    // Fallback ke Ikon Bawaan jika logo.png tidak ditemukan
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'block';
-                                }}
-                            />
-                            <School size={32} className="text-white hidden" />
+                            {appSettings?.app_logo ? (
+                                <img 
+                                    src={`https://api.niswa.online${appSettings.app_logo}`}
+                                    alt="Logo Sekolah" 
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <School size={32} className="text-white" />
+                            )}
                         </div>
-                        <h1 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>EduAdmin</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{appSettings?.school_name || 'EduAdmin'}</h1>
                         <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-                            Sistem Administrasi Sekolah
+                            {appSettings?.school_subtitle || 'Sistem Administrasi Sekolah'}
                         </p>
                     </div>
 

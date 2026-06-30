@@ -3,10 +3,12 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, GraduationCap, Wallet, LogOut, School, ChevronRight, Moon, Sun, ClipboardList, Megaphone, BookOpen, Shield, Award, CreditCard, CalendarDays, PackageSearch, Mail, Menu, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
+import { useSettingsStore } from '../store/settingsStore';
 
 export default function AdminLayout() {
     const { user, fetchUser, logout, isAuthenticated } = useAuthStore();
     const { theme, toggleTheme } = useThemeStore();
+    const { appSettings } = useSettingsStore();
     const navigate = useNavigate();
     const location = useLocation();
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -106,15 +108,19 @@ export default function AdminLayout() {
                 {/* Logo */}
                 <div className="h-16 flex items-center gap-3 px-6 relative"
                     style={{ borderBottom: '1px solid var(--border)' }}>
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
                         style={{ background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)' }}>
-                        <School size={16} className="text-white" />
+                        {appSettings?.app_logo ? (
+                            <img src={`https://api.niswa.online${appSettings.app_logo}`} alt="Logo" className="w-full h-full object-cover" />
+                        ) : (
+                            <School size={16} className="text-white" />
+                        )}
                     </div>
                     <div>
                         <p className="font-bold text-sm tracking-wide leading-none" style={{ color: 'var(--text-primary)' }}>
-                            EduAdmin
+                            {appSettings?.school_name || 'EduAdmin'}
                         </p>
-                        <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>School System</p>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{appSettings?.school_subtitle || 'School System'}</p>
                     </div>
                     {/* Close button for mobile */}
                     <button 

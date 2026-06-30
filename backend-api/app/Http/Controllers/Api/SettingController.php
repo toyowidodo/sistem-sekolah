@@ -17,8 +17,19 @@ class SettingController extends Controller
 
     public function update(Request $request)
     {
-        $data = $request->all();
-        
+        $data = $request->except('app_logo');
+
+        if ($request->hasFile('app_logo')) {
+            $file = $request->file('app_logo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/logos'), $filename);
+            
+            Setting::updateOrCreate(
+                ['key' => 'app_logo'],
+                ['value' => '/uploads/logos/' . $filename]
+            );
+        }
+
         foreach ($data as $key => $value) {
             Setting::updateOrCreate(
                 ['key' => $key],
