@@ -6,7 +6,7 @@ import ModernSelect from '../../../components/ModernSelect';
 import { useSettingsStore } from '../../../store/settingsStore';
 
 export default function TabSettings() {
-    const { fetchPublicSettings } = useSettingsStore();
+    const { fetchPublicSettings, updateSettings } = useSettingsStore();
     const [settings, setSettings] = useState({
         school_name: '',
         school_subtitle: '',
@@ -48,12 +48,22 @@ export default function TabSettings() {
                 formData.append('app_logo', logoFile);
             }
 
-            await api.post('/settings', formData, {
+            const res = await api.post('/settings', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
+
+            // Langsung update store dengan nilai form sekarang (reactive instant)
+            updateSettings({
+                school_name:     settings.school_name,
+                school_subtitle: settings.school_subtitle,
+            });
+
+            // Refetch dari server untuk mendapatkan data final (terutama path logo baru)
+            await fetchPublicSettings();
+
             swal({ title: 'Sukses!', text: 'Pengaturan sistem berhasil diperbarui.', icon: 'success' });
-            fetchPublicSettings();
         } catch (err) {
+            console.error('Save settings error:', err);
             swal({ title: 'Gagal', text: 'Terjadi kesalahan saat menyimpan pengaturan.', icon: 'error' });
         } finally {
             setIsLoading(false);

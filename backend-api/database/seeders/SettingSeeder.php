@@ -13,12 +13,13 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            ['key' => 'school_name', 'value' => 'Sekolah Nusantara'],
-            ['key' => 'school_address', 'value' => 'Jl. Merdeka No. 10'],
-            ['key' => 'school_phone', 'value' => '08123456789'],
-            ['key' => 'school_email', 'value' => 'info@sekolah.com'],
-            ['key' => 'active_academic_year', 'value' => '2023/2024'],
-            ['key' => 'active_semester', 'value' => 'Ganjil'],
+            ['key' => 'school_name',          'value' => 'Sekolah Nusantara'],
+            ['key' => 'school_subtitle',       'value' => 'Sistem Administrasi Sekolah'],
+            ['key' => 'school_address',        'value' => 'Jl. Merdeka No. 10'],
+            ['key' => 'school_phone',          'value' => '08123456789'],
+            ['key' => 'school_email',          'value' => 'info@sekolah.com'],
+            ['key' => 'active_academic_year',  'value' => '2025/2026'],
+            ['key' => 'active_semester',       'value' => 'Ganjil'],
         ];
 
         foreach ($settings as $setting) {
