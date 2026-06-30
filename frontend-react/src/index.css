@@ -1,0 +1,407 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   CSS VARIABLES — DARK THEME (default)
+   ============================================ */
+:root,
+:root[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-base:        #0a0f1e;
+  --bg-card:        rgba(255,255,255,0.03);
+  --bg-card-hover:  rgba(255,255,255,0.055);
+  --bg-sidebar:     linear-gradient(180deg, #0d1526 0%, #0a0f1e 100%);
+  --bg-topbar:      rgba(10,15,30,0.85);
+  --bg-input:       rgba(255,255,255,0.04);
+  --bg-input-focus: rgba(99,102,241,0.08);
+  --bg-modal:       rgba(13,21,38,0.97);
+  --bg-btn-ghost:   rgba(255,255,255,0.05);
+  --bg-btn-ghost-h: rgba(255,255,255,0.09);
+  --bg-user-panel:  rgba(255,255,255,0.04);
+  --bg-empty-icon:  rgba(99,102,241,0.10);
+  --bg-table-even:  rgba(255,255,255,0.02);
+  --bg-table-hover: rgba(99,102,241,0.07);
+  --bg-table-head:  rgba(255,255,255,0.02);
+  --bg-sidebar-item-h: rgba(255,255,255,0.06);
+  --bg-sidebar-active: linear-gradient(135deg, rgba(99,102,241,0.25) 0%, rgba(6,182,212,0.15) 100%);
+
+  /* Borders */
+  --border:              rgba(255,255,255,0.07);
+  --border-card:         rgba(255,255,255,0.07);
+  --border-input:        rgba(255,255,255,0.10);
+  --border-input-focus:  rgba(99,102,241,0.5);
+  --border-modal:        rgba(255,255,255,0.10);
+  --border-sidebar-item: rgba(99,102,241,0.25);
+  --border-empty-icon:   rgba(99,102,241,0.20);
+  --border-btn-ghost:    rgba(255,255,255,0.08);
+  --border-btn-ghost-h:  rgba(255,255,255,0.15);
+
+  /* Text */
+  --text-primary:   #f1f5f9;
+  --text-secondary: rgba(148,163,184,0.85);
+  --text-muted:     rgba(100,116,139,0.65);
+  --text-label:     rgba(148,163,184,0.6);
+  --text-input:     #e2e8f0;
+  --text-ph:        rgba(148,163,184,0.45);
+  --text-th:        rgba(148,163,184,0.5);
+  --text-td:        rgba(226,232,240,0.85);
+  --text-btn-ghost: #cbd5e1;
+  --text-btn-ghost-h: #f1f5f9;
+  --text-sidebar:   rgba(148,163,184,0.8);
+  --text-sidebar-active: #a5b4fc;
+  --text-footer:    rgba(100,116,139,0.6);
+
+  /* Shadows */
+  --shadow-card:   0 4px 20px rgba(0,0,0,0.30);
+  --shadow-card-h: 0 8px 32px rgba(0,0,0,0.45);
+  --shadow-modal:  0 24px 60px rgba(0,0,0,0.60);
+
+  /* Sidebar glow */
+  --sidebar-glow: rgba(99,102,241,0.12);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(99,102,241,0.40);
+  --scrollbar-thumb-h: rgba(99,102,241,0.70);
+
+  /* Login blob opacity */
+  --blob-opacity: 0.5;
+
+  /* Toggle button */
+  --toggle-track: rgba(255,255,255,0.08);
+  --toggle-border: rgba(255,255,255,0.12);
+  --toggle-icon-color: #fbbf24;
+
+  /* Clock widget */
+  --clock-bg: rgba(255,255,255,0.04);
+  --clock-border: rgba(255,255,255,0.07);
+  --clock-text: rgba(148,163,184,0.8);
+}
+
+/* ============================================
+   CSS VARIABLES — LIGHT THEME
+   ============================================ */
+:root[data-theme="light"] {
+  /* Backgrounds */
+  --bg-base:        #f1f5f9;
+  --bg-card:        rgba(255,255,255,0.92);
+  --bg-card-hover:  #ffffff;
+  --bg-sidebar:     linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  --bg-topbar:      rgba(255,255,255,0.92);
+  --bg-input:       rgba(0,0,0,0.035);
+  --bg-input-focus: rgba(99,102,241,0.06);
+  --bg-modal:       rgba(255,255,255,0.99);
+  --bg-btn-ghost:   rgba(0,0,0,0.04);
+  --bg-btn-ghost-h: rgba(0,0,0,0.07);
+  --bg-user-panel:  rgba(0,0,0,0.04);
+  --bg-empty-icon:  rgba(99,102,241,0.07);
+  --bg-table-even:  rgba(0,0,0,0.015);
+  --bg-table-hover: rgba(99,102,241,0.04);
+  --bg-table-head:  rgba(0,0,0,0.015);
+  --bg-sidebar-item-h: rgba(0,0,0,0.04);
+  --bg-sidebar-active: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(6,182,212,0.07) 100%);
+
+  /* Borders */
+  --border:              rgba(0,0,0,0.08);
+  --border-card:         rgba(0,0,0,0.07);
+  --border-input:        rgba(0,0,0,0.12);
+  --border-input-focus:  rgba(99,102,241,0.5);
+  --border-modal:        rgba(0,0,0,0.10);
+  --border-sidebar-item: rgba(99,102,241,0.20);
+  --border-empty-icon:   rgba(99,102,241,0.15);
+  --border-btn-ghost:    rgba(0,0,0,0.08);
+  --border-btn-ghost-h:  rgba(0,0,0,0.14);
+
+  /* Text */
+  --text-primary:   #0f172a;
+  --text-secondary: #475569;
+  --text-muted:     #94a3b8;
+  --text-label:     #64748b;
+  --text-input:     #1e293b;
+  --text-ph:        rgba(100,116,139,0.5);
+  --text-th:        #64748b;
+  --text-td:        #1e293b;
+  --text-btn-ghost: #475569;
+  --text-btn-ghost-h: #0f172a;
+  --text-sidebar:   #64748b;
+  --text-sidebar-active: #4f46e5;
+  --text-footer:    #94a3b8;
+
+  /* Shadows */
+  --shadow-card:   0 2px 12px rgba(0,0,0,0.07);
+  --shadow-card-h: 0 6px 24px rgba(0,0,0,0.12);
+  --shadow-modal:  0 16px 48px rgba(0,0,0,0.18);
+
+  /* Sidebar glow */
+  --sidebar-glow: rgba(99,102,241,0.04);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(99,102,241,0.25);
+  --scrollbar-thumb-h: rgba(99,102,241,0.50);
+
+  /* Login blob opacity */
+  --blob-opacity: 0.18;
+
+  /* Toggle button */
+  --toggle-track: rgba(0,0,0,0.06);
+  --toggle-border: rgba(0,0,0,0.10);
+  --toggle-icon-color: #6366f1;
+
+  /* Clock widget */
+  --clock-bg: rgba(0,0,0,0.04);
+  --clock-border: rgba(0,0,0,0.07);
+  --clock-text: #64748b;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-h);
+  }
+}
+
+/* ============================================
+   COMPONENT CLASSES
+   ============================================ */
+@layer components {
+
+  /* Glass Panel */
+  .glass {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Primary Button */
+  .btn-primary {
+    @apply relative inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200;
+    background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+  }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* Ghost Button */
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200;
+    background: var(--bg-btn-ghost);
+    border: 1px solid var(--border-btn-ghost);
+    color: var(--text-btn-ghost);
+  }
+  .btn-ghost:hover {
+    background: var(--bg-btn-ghost-h);
+    border-color: var(--border-btn-ghost-h);
+    color: var(--text-btn-ghost-h);
+    transform: translateY(-1px);
+  }
+
+  /* Success Button */
+  .btn-success {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200;
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  }
+  .btn-success:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(16,185,129,0.4);
+  }
+
+  /* Danger Button */
+  .btn-danger {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200;
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  }
+  .btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(239,68,68,0.4);
+  }
+
+  /* Form Input */
+  .input-dark {
+    @apply w-full px-4 py-2 rounded-xl text-sm transition-all duration-200 outline-none;
+    background: var(--bg-input);
+    border: 1px solid var(--border-input);
+    color: var(--text-input);
+  }
+  .input-dark::placeholder {
+    color: var(--text-ph);
+  }
+  .input-dark:focus {
+    background: var(--bg-input-focus);
+    border-color: var(--border-input-focus);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+  }
+  select.input-dark option {
+    background: var(--bg-modal);
+    color: var(--text-input);
+  }
+
+  /* Card */
+  .card {
+    @apply rounded-2xl transition-all duration-300;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    box-shadow: var(--shadow-card);
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    box-shadow: var(--shadow-card-h);
+    transform: translateY(-2px);
+  }
+
+  /* Badges */
+  .badge-success {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    background: rgba(16,185,129,0.15);
+    color: #34d399;
+    border: 1px solid rgba(16,185,129,0.25);
+  }
+  .badge-danger {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    background: rgba(239,68,68,0.15);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,0.25);
+  }
+
+  /* Sidebar Item */
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 mx-3 rounded-xl text-sm font-medium transition-all duration-200;
+    color: var(--text-sidebar);
+  }
+  .sidebar-item:hover {
+    background: var(--bg-sidebar-item-h);
+    color: var(--text-primary);
+  }
+  .sidebar-item.active {
+    background: var(--bg-sidebar-active);
+    border: 1px solid var(--border-sidebar-item);
+    color: var(--text-sidebar-active);
+  }
+  .sidebar-item.active svg {
+    filter: drop-shadow(0 0 6px rgba(99,102,241,0.7));
+  }
+
+  /* Theme Toggle Switch */
+  .theme-toggle {
+    @apply relative flex items-center cursor-pointer select-none;
+    width: 52px;
+    height: 28px;
+  }
+  .theme-toggle input { display: none; }
+  .theme-toggle-track {
+    @apply absolute inset-0 rounded-full transition-all duration-300;
+    background: var(--toggle-track);
+    border: 1px solid var(--toggle-border);
+  }
+  .theme-toggle-thumb {
+    @apply absolute flex items-center justify-center rounded-full transition-all duration-300;
+    width: 22px;
+    height: 22px;
+    top: 3px;
+    left: 3px;
+    background: linear-gradient(135deg, #6366f1, #06b6d4);
+    box-shadow: 0 2px 8px rgba(99,102,241,0.4);
+  }
+  [data-theme="light"] .theme-toggle-thumb {
+    left: calc(100% - 25px);
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    box-shadow: 0 2px 8px rgba(245,158,11,0.4);
+  }
+}
+
+/* ============================================
+   GLOBAL TRANSITIONS
+   ============================================ */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+/* Exclude transforms and animations from the broad transition */
+.btn-primary, .btn-ghost, .btn-success, .btn-danger, .card {
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s,
+              box-shadow 0.2s, transform 0.2s;
+}
+
+/* ============================================
+   ANIMATED BLOBS (Login)
+   ============================================ */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: var(--blob-opacity);
+  animation: blob 8s ease-in-out infinite;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+  aside, header, .no-print, button, a { display: none !important; }
+  body, html {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .flex.h-screen { height: auto !important; display: block !important; }
+  main { padding: 0 !important; overflow: visible !important; }
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 20px !important;
+  }
+  th, td {
+    border: 1px solid #000 !important;
+    padding: 8px !important;
+    text-align: left !important;
+    font-size: 10pt !important;
+    color: black !important;
+    background: white !important;
+  }
+  th {
+    background-color: #f2f2f2 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
