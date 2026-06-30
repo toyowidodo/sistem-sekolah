@@ -295,11 +295,17 @@ export default function AdminLayout() {
                             </span>
                         </button>
 
-                        {/* Avatar */}
-                        <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white"
-                            style={{ background: 'linear-gradient(135deg, #6366f1, #06b6d4)' }}>
+                        {/* Avatar — klik untuk ke profil */}
+                        <button
+                            onClick={() => navigate('/profile')}
+                            title={`Profil: ${user?.name || 'Pengguna'}`}
+                            className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white transition-all duration-200 flex-shrink-0"
+                            style={{ background: 'linear-gradient(135deg, #6366f1, #06b6d4)' }}
+                            onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'scale(1.08)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)'; }}
+                        >
                             {user?.name?.charAt(0)?.toUpperCase() || 'A'}
-                        </div>
+                        </button>
                     </div>
                 </header>
 
