@@ -387,17 +387,17 @@ export default function Students() {
                                 <input {...register('name', { required: true })} className="input-dark w-full" placeholder="Nama siswa" />
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label className={labelClass} style={labelStyle}>Tempat Lahir <span className="text-red-400">*</span></label>
-                                <input {...register('birth_place', { required: true })} className="input-dark w-full" placeholder="Kota kelahiran" />
+                                <input {...register('pob', { required: true })} className="input-dark w-full" placeholder="Kota lahir" />
                             </div>
                             <div>
                                 <label className={labelClass} style={labelStyle}>Tanggal Lahir <span className="text-red-400">*</span></label>
-                                <ModernDatepicker  {...register('birth_date', { required: true })} className="input-dark w-full" />
+                                <input type="date" {...register('dob', { required: true })} className="input-dark w-full" />
                             </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
                                 <label className={labelClass} style={labelStyle}>Jenis Kelamin <span className="text-red-400">*</span></label>
                                 <ModernSelect {...register('gender')} className="input-dark w-full">
@@ -437,7 +437,7 @@ export default function Students() {
 
                     {/* SECTION: DATA ORANG TUA & WALI */}
                     <div className={formTab === 'ortu' ? 'block' : 'hidden'}>
-                        <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div className="bg-[var(--bg-input)] p-3 rounded-xl border border-[var(--border-input)]">
                                 <h4 className="font-bold text-indigo-400 mb-3 text-sm">Data Ayah</h4>
                                 <div className="space-y-3">
@@ -468,8 +468,8 @@ export default function Students() {
 
                         <div className="mb-4 border border-[var(--border-input)] p-3 rounded-xl">
                             <h4 className="font-bold text-gray-300 mb-3 text-sm">Alamat Orang Tua</h4>
-                            <div className="grid grid-cols-2 gap-3 mb-3">
-                                <div className="col-span-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                <div className="sm:col-span-2">
                                     <label className={labelClass} style={labelStyle}>Jalan</label>
                                     <input {...register('parent_address_street')} className="input-dark w-full" placeholder="Jalan / Perumahan" />
                                 </div>
@@ -494,7 +494,7 @@ export default function Students() {
 
                         <div className="mb-4 bg-[var(--bg-input)] border border-[var(--border-input)] p-3 rounded-xl">
                             <h4 className="font-bold text-gray-300 mb-3 text-sm">Wali Peserta Didik (Opsional)</h4>
-                            <div className="grid grid-cols-2 gap-3 mb-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                                 <div>
                                     <label className={labelClass} style={labelStyle}>Nama Wali</label>
                                     <input {...register('guardian_name')} className="input-dark w-full" placeholder="Nama wali" />
@@ -503,7 +503,7 @@ export default function Students() {
                                     <label className={labelClass} style={labelStyle}>Pekerjaan Wali</label>
                                     <input {...register('guardian_job')} className="input-dark w-full" placeholder="Pekerjaan" />
                                 </div>
-                                <div className="col-span-2">
+                                <div className="sm:col-span-2">
                                     <label className={labelClass} style={labelStyle}>Alamat Wali</label>
                                     <textarea {...register('guardian_address')} className="input-dark w-full resize-none" rows="1" placeholder="Alamat wali" />
                                 </div>

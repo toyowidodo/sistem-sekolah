@@ -51,7 +51,7 @@ export default function Login() {
 
             {/* Login Card */}
             <div
-                className="relative w-full max-w-md mx-4 rounded-3xl animate-slide-up"
+                className="relative w-full max-w-[90%] sm:max-w-md mx-4 rounded-3xl animate-slide-up"
                 style={{
                     background: 'var(--bg-modal)',
                     border: '1px solid var(--border-modal)',
@@ -65,20 +65,32 @@ export default function Login() {
                     style={{ background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.6), rgba(6,182,212,0.6), transparent)' }}
                 />
 
-                <div className="p-8">
+                <div className="p-6 sm:p-8">
                     {/* Header */}
-                    <div className="text-center mb-8">
+                    <div className="text-center mb-6 sm:mb-8">
+                        {/* Logo Container */}
                         <div
-                            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden"
                             style={{
                                 background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
                                 boxShadow: '0 8px 24px rgba(99,102,241,0.4)',
                             }}
                         >
-                            <School size={26} className="text-white" />
+                            {/* Jika Anda punya logo asli, ganti bagian ini. Pastikan logo bernama 'logo.png' dan letakkan di folder public. */}
+                            <img 
+                                src="/logo.png" 
+                                alt="Logo Sekolah" 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    // Fallback ke Ikon Bawaan jika logo.png tidak ditemukan
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'block';
+                                }}
+                            />
+                            <School size={32} className="text-white hidden" />
                         </div>
-                        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>EduAdmin</h1>
-                        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+                        <h1 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>EduAdmin</h1>
+                        <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
                             Sistem Administrasi Sekolah
                         </p>
                     </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, Wallet, LogOut, School, ChevronRight, Moon, Sun, ClipboardList, Megaphone, BookOpen, Shield, Award, CreditCard, CalendarDays, PackageSearch, Mail } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, Wallet, LogOut, School, ChevronRight, Moon, Sun, ClipboardList, Megaphone, BookOpen, Shield, Award, CreditCard, CalendarDays, PackageSearch, Mail, Menu, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 
@@ -10,7 +10,7 @@ export default function AdminLayout() {
     const navigate = useNavigate();
     const location = useLocation();
     const [currentTime, setCurrentTime] = useState(new Date());
-
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     useEffect(() => {
         if (isAuthenticated && !user) fetchUser();
     }, [isAuthenticated, user, fetchUser]);
@@ -65,6 +65,11 @@ export default function AdminLayout() {
     const isActive = (item) =>
         item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path);
 
+    // Menutup sidebar ketika route berubah (di mobile)
+    useEffect(() => {
+        setIsSidebarOpen(false);
+    }, [location.pathname]);
+
     const greeting = () => {
         const h = currentTime.getHours();
         if (h < 11) return 'Selamat pagi';
@@ -76,11 +81,19 @@ export default function AdminLayout() {
     const isDark = theme === 'dark';
 
     return (
-        <div className="flex h-screen" style={{ background: 'var(--bg-base)' }}>
+        <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
+
+            {/* Mobile Sidebar Overlay */}
+            {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm transition-opacity" 
+                    onClick={() => setIsSidebarOpen(false)} 
+                />
+            )}
 
             {/* ── Sidebar ── */}
             <aside
-                className="w-64 flex flex-col flex-shrink-0 relative overflow-hidden"
+                className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col flex-shrink-0 overflow-hidden transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
                 style={{
                     background: 'var(--bg-sidebar)',
                     borderRight: '1px solid var(--border)',
@@ -103,6 +116,14 @@ export default function AdminLayout() {
                         </p>
                         <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>School System</p>
                     </div>
+                    {/* Close button for mobile */}
+                    <button 
+                        className="md:hidden absolute right-4 p-1 rounded-lg"
+                        style={{ color: 'var(--text-muted)' }}
+                        onClick={() => setIsSidebarOpen(false)}
+                    >
+                        <X size={18} />
+                    </button>
                 </div>
 
                 {/* Nav */}
@@ -195,20 +216,29 @@ export default function AdminLayout() {
 
                 {/* Topbar */}
                 <header
-                    className="h-16 flex items-center justify-between px-6 flex-shrink-0"
+                    className="h-16 flex items-center justify-between px-4 sm:px-6 flex-shrink-0"
                     style={{
                         background: 'var(--bg-topbar)',
                         borderBottom: '1px solid var(--border)',
                         backdropFilter: 'blur(20px)',
                     }}
                 >
-                    <div>
-                        <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-                            {greeting()},
-                        </p>
-                        <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                            {user?.name || 'Administrator'} 👋
-                        </h2>
+                    <div className="flex items-center gap-3">
+                        <button 
+                            onClick={() => setIsSidebarOpen(true)} 
+                            className="md:hidden p-2 -ml-2 rounded-xl transition-colors"
+                            style={{ color: 'var(--text-primary)', background: 'var(--bg-input)' }}
+                        >
+                            <Menu size={20} />
+                        </button>
+                        <div>
+                            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                                {greeting()},
+                            </p>
+                            <h2 className="text-sm font-semibold truncate max-w-[150px] sm:max-w-none" style={{ color: 'var(--text-primary)' }}>
+                                {user?.name || 'Administrator'} 👋
+                            </h2>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-3">

@@ -185,6 +185,15 @@
   ::-webkit-scrollbar-thumb:hover {
     background: var(--scrollbar-thumb-h);
   }
+
+  /* Hide scrollbar for element with no-scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
 }
 
 /* ============================================

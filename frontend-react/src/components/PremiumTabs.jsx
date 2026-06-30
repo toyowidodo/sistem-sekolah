@@ -6,7 +6,7 @@ export default function PremiumTabs({ tabs, activeTab, setActiveTab, colorFrom, 
     const layoutIdPrefix = useId();
 
     return (
-        <div className="flex items-center gap-1 p-1 rounded-xl w-fit flex-wrap relative z-0"
+        <div className="flex items-center gap-1 p-1 rounded-xl w-full sm:w-fit overflow-x-auto no-scrollbar relative z-0"
             style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)' }}
             onMouseLeave={() => setHoveredTab(null)}>
             {tabs.map(t => {
