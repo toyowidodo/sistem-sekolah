@@ -1,9 +1,11 @@
-﻿import { useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useAuthStore } from '../store/authStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock, School, Eye, EyeOff, ShieldCheck, GraduationCap, UserCog } from 'lucide-react';
 import { useState } from 'react';
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function Login() {
     const login = useAuthStore((state) => state.login);
@@ -12,7 +14,7 @@ export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [activeTab, setActiveTab] = useState('admin'); // 'admin' | 'siswa'
+    const [activeTab, setActiveTab] = useState('admin');
 
     const { register: registerAdmin, handleSubmit: handleSubmitAdmin, formState: { errors: errorsAdmin } } = useForm();
     const { register: registerSiswa, handleSubmit: handleSubmitSiswa, formState: { errors: errorsSiswa } } = useForm();
@@ -35,10 +37,19 @@ export default function Login() {
         { key: 'siswa', label: 'Portal Siswa', icon: GraduationCap },
     ];
 
+    const logoSrc = appSettings?.app_logo ? `${API_BASE}${appSettings.app_logo}` : null;
+
+    const Spinner = () => (
+        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+        </svg>
+    );
+
     return (
         <div className="min-h-screen flex relative overflow-hidden" style={{ background: 'var(--bg-base)' }}>
 
-            {/* â”€â”€ Left Decorative Panel â”€â”€ */}
+            {/* Left Decorative Panel */}
             <div
                 className="hidden lg:flex flex-col justify-between w-[45%] flex-shrink-0 relative p-12 overflow-hidden"
                 style={{ background: 'linear-gradient(145deg, #0d1526 0%, #0a0f1e 100%)' }}
@@ -63,8 +74,8 @@ export default function Login() {
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0"
                             style={{ background: 'linear-gradient(135deg, #6366f1, #06b6d4)', boxShadow: '0 4px 16px rgba(99,102,241,0.4)' }}>
-                            {appSettings?.app_logo ? (
-                                <img src={`${import.meta.env.VITE_API_BASE_URL || ""}${appSettings.app_logo}`} alt="Logo" className="w-full h-full object-cover" />
+                            {logoSrc ? (
+                                <img src={logoSrc} alt="Logo" className="w-full h-full object-cover" />
                             ) : (
                                 <School size={20} className="text-white" />
                             )}
@@ -99,9 +110,9 @@ export default function Login() {
 
                     <div className="mt-8 space-y-3">
                         {[
-                            { icon: 'ðŸ“Š', text: 'Dashboard analitik real-time' },
-                            { icon: 'ðŸ‘¨â€ðŸŽ“', text: 'Portal siswa & laporan nilai' },
-                            { icon: 'ðŸ’³', text: 'Pengelolaan SPP & keuangan otomatis' },
+                            { icon: '📊', text: 'Dashboard analitik real-time' },
+                            { icon: '👨‍🎓', text: 'Portal siswa & laporan nilai' },
+                            { icon: '💳', text: 'Pengelolaan SPP & keuangan otomatis' },
                         ].map((f, i) => (
                             <div key={i} className="flex items-center gap-3">
                                 <span className="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
@@ -116,12 +127,12 @@ export default function Login() {
 
                 <div className="relative z-10">
                     <p className="text-xs" style={{ color: 'rgba(100,116,139,0.55)' }}>
-                        Â© {new Date().getFullYear()} {appSettings?.school_name || 'EduAdmin'} Â· Hak cipta dilindungi
+                        &copy; {new Date().getFullYear()} {appSettings?.school_name || 'EduAdmin'} &middot; Hak cipta dilindungi
                     </p>
                 </div>
             </div>
 
-            {/* â”€â”€ Right Panel (Login Form) â”€â”€ */}
+            {/* Right Panel (Login Form) */}
             <div className="flex-1 flex items-center justify-center p-6 relative">
 
                 {/* Mobile blobs */}
@@ -157,15 +168,15 @@ export default function Login() {
                                     background: 'linear-gradient(135deg, #6366f1, #06b6d4)',
                                     boxShadow: '0 8px 24px rgba(99,102,241,0.4)',
                                 }}>
-                                {appSettings?.app_logo ? (
-                                    <img src={`${import.meta.env.VITE_API_BASE_URL || ""}${appSettings.app_logo}`} alt="Logo" className="w-full h-full object-cover" />
+                                {logoSrc ? (
+                                    <img src={logoSrc} alt="Logo" className="w-full h-full object-cover" />
                                 ) : (
                                     <School size={26} className="text-white" />
                                 )}
                             </div>
                         </div>
 
-                        {/* â”€â”€ Tab Switcher â”€â”€ */}
+                        {/* Tab Switcher */}
                         <div className="flex rounded-xl p-1 mb-6"
                             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)' }}>
                             {tabs.map((tab) => {
@@ -204,7 +215,7 @@ export default function Login() {
                             {activeTab === 'admin' ? (
                                 <>
                                     <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                                        Selamat Datang ðŸ‘‹
+                                        Selamat Datang &#x1F44B;
                                     </h2>
                                     <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
                                         Masuk sebagai Admin atau Staff
@@ -213,10 +224,10 @@ export default function Login() {
                             ) : (
                                 <>
                                     <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                                        Portal Siswa ðŸŽ“
+                                        Portal Siswa &#x1F393;
                                     </h2>
                                     <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-                                        Masuk untuk melihat nilai, jadwal & SPP
+                                        Masuk untuk melihat nilai, jadwal &amp; SPP
                                     </p>
                                 </>
                             )}
@@ -230,12 +241,12 @@ export default function Login() {
                                     border: '1px solid rgba(239,68,68,0.2)',
                                     color: '#f87171',
                                 }}>
-                                <span className="mt-0.5 flex-shrink-0">âš ï¸</span>
+                                <span className="mt-0.5 flex-shrink-0">&#x26A0;&#xFE0F;</span>
                                 <span>{errorMsg}</span>
                             </div>
                         )}
 
-                        {/* â”€â”€ Admin Form â”€â”€ */}
+                        {/* Admin Form */}
                         {activeTab === 'admin' && (
                             <form onSubmit={handleSubmitAdmin(onSubmit)} className="space-y-5" autoComplete="off">
                                 <div>
@@ -290,19 +301,12 @@ export default function Login() {
                                     onMouseEnter={e => { if (!isLoading) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(99,102,241,0.55)'; } }}
                                     onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(99,102,241,0.4)'; }}
                                 >
-                                    {isLoading ? (
-                                        <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                                        </svg> Memverifikasi...</>
-                                    ) : (
-                                        <><LogIn size={16} /> Masuk ke Dashboard</>
-                                    )}
+                                    {isLoading ? <><Spinner /> Memverifikasi...</> : <><LogIn size={16} /> Masuk ke Dashboard</>}
                                 </button>
                             </form>
                         )}
 
-                        {/* â”€â”€ Siswa Form â”€â”€ */}
+                        {/* Siswa Form */}
                         {activeTab === 'siswa' && (
                             <form onSubmit={handleSubmitSiswa(onSubmit)} className="space-y-5" autoComplete="off">
                                 {/* Info banner */}
@@ -328,9 +332,7 @@ export default function Login() {
                                             className="input-dark pl-10 w-full"
                                             placeholder="email.siswa@sekolah.id"
                                             autoComplete="off"
-                                            style={{
-                                                ...(errorsSiswa.email ? { borderColor: 'rgba(239,68,68,0.5)' } : {}),
-                                            }}
+                                            style={errorsSiswa.email ? { borderColor: 'rgba(239,68,68,0.5)' } : {}}
                                         />
                                     </div>
                                     {errorsSiswa.email && <p className="text-xs mt-1.5" style={{ color: '#f87171' }}>{errorsSiswa.email.message}</p>}
@@ -370,14 +372,7 @@ export default function Login() {
                                     onMouseEnter={e => { if (!isLoading) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(6,182,212,0.55)'; } }}
                                     onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(6,182,212,0.4)'; }}
                                 >
-                                    {isLoading ? (
-                                        <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                                        </svg> Memverifikasi...</>
-                                    ) : (
-                                        <><GraduationCap size={16} /> Masuk ke Portal Siswa</>
-                                    )}
+                                    {isLoading ? <><Spinner /> Memverifikasi...</> : <><GraduationCap size={16} /> Masuk ke Portal Siswa</>}
                                 </button>
                             </form>
                         )}
@@ -385,7 +380,7 @@ export default function Login() {
                         {/* Footer */}
                         <div className="mt-7 pt-5" style={{ borderTop: '1px solid var(--border)' }}>
                             <p className="text-center text-xs" style={{ color: 'var(--text-muted)' }}>
-                                Â© {new Date().getFullYear()} {appSettings?.school_name || 'EduAdmin'} &nbsp;Â·&nbsp; Seluruh hak dilindungi
+                                &copy; {new Date().getFullYear()} {appSettings?.school_name || 'EduAdmin'} &nbsp;&middot;&nbsp; Seluruh hak dilindungi
                             </p>
                         </div>
                     </div>
@@ -394,4 +389,3 @@ export default function Login() {
         </div>
     );
 }
-
