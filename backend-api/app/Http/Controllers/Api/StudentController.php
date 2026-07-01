@@ -24,6 +24,11 @@ class StudentController extends Controller
 
     public function index(Request $request)
     {
+        $request->validate([
+            'classroom_id' => 'nullable|exists:classrooms,id',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $students = $this->studentService->getAll($request);
         return StudentResource::collection($students);
     }
@@ -71,14 +76,21 @@ class StudentController extends Controller
     public function importExcel(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:csv,xls,xlsx'
+            'file' => 'required|mimes:csv,xls,xlsx|max:5120'
+        ], [
+            'file.required' => 'File wajib diupload',
+            'file.mimes' => 'File harus format CSV atau Excel',
+            'file.max' => 'Ukuran file maksimal 5MB',
         ]);
 
         try {
             Excel::import(new StudentsImport, $request->file('file'));
             return response()->json(['message' => 'Data siswa berhasil diimport'], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Gagal mengimport data: ' . $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Gagal mengimport data: ' . $e->getMessage(),
+                'code' => 'IMPORT_FAILED'
+            ], 422);
         }
     }
 }
