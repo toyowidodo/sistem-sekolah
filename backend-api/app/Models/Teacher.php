@@ -4,13 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Teacher extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'nip', 'name', 'position', 'subject', 'education', 'phone', 'photo'
-    ];
+    protected $fillable = ['nip', 'name', 'position', 'subject', 'education', 'phone', 'photo'];
+
+    public function classrooms()
+    {
+        return $this->hasMany(Classroom::class, 'homeroom_teacher_id');
+    }
 }
