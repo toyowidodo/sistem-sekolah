@@ -7,6 +7,10 @@ const timeout = import.meta.env.VITE_API_TIMEOUT || 30000;
 const api = axios.create({
     baseURL: `${baseURL}/api`,
     timeout: parseInt(timeout),
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    },
 });
 
 // Request interceptor untuk menambahkan token
@@ -35,7 +39,13 @@ api.interceptors.response.use(
             localStorage.removeItem('user');
             window.location.href = '/login';
         } else if (error.response?.status === 403) {
-            logger.warn('Access forbidden');
+            logger.warn('Access forbidden - insufficient permissions');
+        } else if (error.response?.status === 422) {
+            // Validation error
+            logger.warn('Validation error', error.response?.data?.errors);
+        } else if (error.response?.status === 429) {
+            // Rate limited
+            logger.error('Too many requests - rate limited', error.response?.data);
         } else if (error.response?.status >= 500) {
             logger.error('Server error', error.response?.data);
         } else if (error.message === 'Network Error' || !error.response) {
