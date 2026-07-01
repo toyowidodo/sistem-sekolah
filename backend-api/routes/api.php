@@ -21,11 +21,13 @@ use App\Http\Controllers\Api\SppController;
 use App\Http\Controllers\Api\AcademicEventController;
 use App\Http\Controllers\Api\SettingController;
 
-Route::post('/login', [AuthController::class, 'login']);
+// Public routes (with rate limiting)
+Route::middleware('throttle:10,1')->post('/login', [AuthController::class, 'login']);
 
 Route::get('/public-settings', [SettingController::class, 'publicSettings']);
 
-Route::middleware('auth:sanctum')->group(function () {
+// Protected routes (all require authentication)
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
