@@ -177,6 +177,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('permissions', [RoleController::class, 'permissions']);
         Route::apiResource('roles', RoleController::class)->only(['index', 'update']);
         
+        // Notifikasi keluar (WhatsApp/SMS)
+        Route::get('notifications/templates', [\App\Http\Controllers\Api\NotificationController::class, 'templates']);
+        Route::put('notifications/templates/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'updateTemplate']);
+        Route::get('notifications/logs', [\App\Http\Controllers\Api\NotificationController::class, 'logs']);
+        Route::post('notifications/test', [\App\Http\Controllers\Api\NotificationController::class, 'test']);
+
         Route::post('settings', [SettingController::class, 'update']);
         Route::post('maintenance/clear-cache', [\App\Http\Controllers\Api\MaintenanceController::class, 'clearCache']);
     });

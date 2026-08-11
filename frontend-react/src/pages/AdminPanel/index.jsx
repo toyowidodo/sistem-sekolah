@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Users, Activity, Database, AlertTriangle, Settings as SettingsIcon, Wrench } from 'lucide-react';
+import { Shield, Users, Activity, Database, AlertTriangle, Settings as SettingsIcon, Wrench, MessageSquare } from 'lucide-react';
 import PremiumTabs from '../../components/PremiumTabs';
 import TabUsers from './components/TabUsers';
 import TabRoles from './components/TabRoles';
@@ -7,6 +7,7 @@ import TabActivityLog from './components/TabActivityLog';
 import TabBackup from './components/TabBackup';
 import TabSettings from './components/TabSettings';
 import TabMaintenance from './components/TabMaintenance';
+import TabNotifikasi from './components/TabNotifikasi';
 
 export default function AdminPanel() {
     const [tab, setTab] = useState('settings');
@@ -15,6 +16,7 @@ export default function AdminPanel() {
         { id:'settings',    label:'Pengaturan Sistem', icon: SettingsIcon },
         { id:'users',       label:'Manajemen User',    icon: Users },
         { id:'roles',       label:'Hak Akses',         icon: Shield },
+        { id:'notifikasi',  label:'Notifikasi',        icon: MessageSquare },
         { id:'activity',    label:'Activity Log',      icon: Activity },
         { id:'backup',      label:'Backup Data',       icon: Database },
         { id:'maintenance', label:'Perawatan Sistem',  icon: Wrench },
@@ -59,6 +61,7 @@ export default function AdminPanel() {
             {tab === 'settings'    && <TabSettings/>}
             {tab === 'users'       && <TabUsers/>}
             {tab === 'roles'       && <TabRoles/>}
+            {tab === 'notifikasi'  && <TabNotifikasi/>}
             {tab === 'activity'    && <TabActivityLog/>}
             {tab === 'backup'      && <TabBackup/>}
             {tab === 'maintenance' && <TabMaintenance/>}
