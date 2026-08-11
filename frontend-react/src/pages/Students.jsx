@@ -9,6 +9,7 @@ import autoTable from 'jspdf-autotable';
 import Swal from 'sweetalert2';
 import { useForm } from 'react-hook-form';
 import ModernSelect from '../components/ModernSelect';
+import GuardianModal from './GuardianModal';
 
 const labelClass = "block text-xs font-semibold uppercase tracking-wider mb-1.5";
 const labelStyle = { color: 'var(--text-label)' };
@@ -20,6 +21,9 @@ export default function Students() {
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [viewData, setViewData] = useState(null);
+    const [history, setHistory] = useState([]);
+    const [isGuardianOpen, setIsGuardianOpen] = useState(false);
+    const [guardianStudent, setGuardianStudent] = useState(null);
     const fileInputRef = useRef(null);
     
     const [formTab, setFormTab] = useState('pribadi');
@@ -71,7 +75,12 @@ export default function Students() {
 
     const openViewModal = (student) => {
         setViewData(student);
+        setHistory([]);
         setIsViewModalOpen(true);
+
+        api.get(`/promotions/history/${student.id}`)
+            .then(res => setHistory(res.data.data || []))
+            .catch(() => setHistory([]));
     };
 
     const onSubmit = async (data) => {
@@ -272,6 +281,8 @@ export default function Students() {
                 <div className="flex items-center gap-2">
                     {actionBtn('rgba(16,185,129,0.1)', '#34d399', 'rgba(16,185,129,0.2)', 'rgba(16,185,129,0.22)',
                         <Eye size={14} />, () => openViewModal(row), 'Detail')}
+                    {actionBtn('rgba(6,182,212,0.1)', '#22d3ee', 'rgba(6,182,212,0.2)', 'rgba(6,182,212,0.22)',
+                        <Users size={14} />, () => { setGuardianStudent(row); setIsGuardianOpen(true); }, 'Akun Orang Tua')}
                     {actionBtn('rgba(99,102,241,0.1)', '#818cf8', 'rgba(99,102,241,0.2)', 'rgba(99,102,241,0.22)',
                         <Edit size={14} />, () => openEditModal(row), 'Edit')}
                     {actionBtn('rgba(239,68,68,0.1)', '#f87171', 'rgba(239,68,68,0.2)', 'rgba(239,68,68,0.22)',
@@ -377,6 +388,38 @@ export default function Students() {
                         </div>
 
                         <div>
+                            <h3 className="text-sm font-bold border-b border-[var(--border)] pb-2 mb-3 text-indigo-400">Riwayat Kelas</h3>
+                            {history.length === 0 ? (
+                                <p className="text-sm text-gray-500">Belum ada riwayat kelas tercatat.</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {history.map((h, i) => (
+                                        <div key={i} className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg"
+                                            style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)' }}>
+                                            <div className="min-w-0">
+                                                <span className="text-sm font-semibold text-gray-200">{h.classroom_name}</span>
+                                                <span className="text-xs text-gray-500 ml-2">{h.academic_year}</span>
+                                            </div>
+                                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full capitalize flex-shrink-0"
+                                                style={{
+                                                    background: h.status === 'lulus' ? 'rgba(99,102,241,0.15)'
+                                                        : h.status === 'naik' ? 'rgba(16,185,129,0.15)'
+                                                        : h.status === 'tinggal' ? 'rgba(245,158,11,0.15)'
+                                                        : h.status === 'keluar' ? 'rgba(239,68,68,0.15)' : 'rgba(148,163,184,0.15)',
+                                                    color: h.status === 'lulus' ? '#818cf8'
+                                                        : h.status === 'naik' ? '#34d399'
+                                                        : h.status === 'tinggal' ? '#fbbf24'
+                                                        : h.status === 'keluar' ? '#f87171' : '#94a3b8',
+                                                }}>
+                                                {h.status}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div>
                             <h3 className="text-sm font-bold border-b border-[var(--border)] pb-2 mb-3 text-indigo-400">Data Wali (Opsional)</h3>
                             <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
                                 <div><span className="block text-gray-500 text-xs">Nama Wali</span> <span className="font-semibold text-gray-200">{viewData.guardian_name || '-'}</span></div>
@@ -387,6 +430,13 @@ export default function Students() {
                     </div>
                 )}
             </Modal>
+
+            {/* Modal Akun Orang Tua */}
+            <GuardianModal
+                student={guardianStudent}
+                isOpen={isGuardianOpen}
+                onClose={() => setIsGuardianOpen(false)}
+            />
 
             {/* Modal Form Tambah/Edit */}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}

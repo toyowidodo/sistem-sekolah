@@ -1,25 +1,31 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import {
-    BookOpen, Calendar, School
+    BookOpen, Calendar, School, CalendarRange, GraduationCap
 } from 'lucide-react';
 import PremiumTabs from '../../components/PremiumTabs';
 import TabKelas from './components/TabKelas';
 import TabMapel from './components/TabMapel';
 import TabJadwal from './components/TabJadwal';
+import TabTahunAjaran from './components/TabTahunAjaran';
+import TabKenaikanKelas from './components/TabKenaikanKelas';
 
 export default function Academic() {
     const [tab, setTab]         = useState('kelas');
     const [teachers, setTeachers] = useState([]);
+    const [classrooms, setClassrooms] = useState([]);
 
     useEffect(() => {
         api.get('/teachers').then(r => setTeachers(r.data.data || [])).catch(() => {});
+        api.get('/classrooms').then(r => setClassrooms(r.data.data || [])).catch(() => {});
     }, []);
 
     const tabs = [
-        { id: 'kelas',  label: 'Kelas',           icon: School },
-        { id: 'mapel',  label: 'Mata Pelajaran',   icon: BookOpen },
-        { id: 'jadwal', label: 'Jadwal Pelajaran', icon: Calendar },
+        { id: 'kelas',    label: 'Kelas',           icon: School },
+        { id: 'mapel',    label: 'Mata Pelajaran',   icon: BookOpen },
+        { id: 'jadwal',   label: 'Jadwal Pelajaran', icon: Calendar },
+        { id: 'tahun',    label: 'Tahun Ajaran',     icon: CalendarRange },
+        { id: 'kenaikan', label: 'Kenaikan Kelas',   icon: GraduationCap },
     ];
 
     return (
@@ -49,9 +55,11 @@ export default function Academic() {
             />
 
             {/* Tab Content */}
-            {tab === 'kelas'  && <TabKelas  teachers={teachers}/>}
-            {tab === 'mapel'  && <TabMapel/>}
-            {tab === 'jadwal' && <TabJadwal teachers={teachers}/>}
+            {tab === 'kelas'    && <TabKelas  teachers={teachers}/>}
+            {tab === 'mapel'    && <TabMapel/>}
+            {tab === 'jadwal'   && <TabJadwal teachers={teachers}/>}
+            {tab === 'tahun'    && <TabTahunAjaran/>}
+            {tab === 'kenaikan' && <TabKenaikanKelas classrooms={classrooms}/>}
         </div>
     );
 }

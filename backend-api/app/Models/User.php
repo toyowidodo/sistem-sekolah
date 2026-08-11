@@ -60,6 +60,14 @@ class User extends Authenticatable
         return $this->hasOne(Student::class);
     }
 
+    /** Anak-anak yang diikuti akun ini (untuk role Orang Tua) */
+    public function children()
+    {
+        return $this->belongsToMany(Student::class, 'student_guardians')
+            ->withPivot('relation', 'phone')
+            ->withTimestamps();
+    }
+
     /**
      * Admin melihat seluruh data sekolah; guru dibatasi ke kelas & mapel yang
      * diampu atau diwalikan.

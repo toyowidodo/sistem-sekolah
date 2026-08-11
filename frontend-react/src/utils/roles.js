@@ -12,3 +12,6 @@ export const isGuru = (user) =>
 
 export const isSiswa = (user) =>
     !!user?.roles?.includes('Siswa');
+
+export const isOrangTua = (user) =>
+    !!user?.roles?.includes('Orang Tua');
