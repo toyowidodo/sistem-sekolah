@@ -23,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_active',
     ];
 
     /**
@@ -45,6 +46,26 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
+    }
+
+    public function teacher()
+    {
+        return $this->hasOne(Teacher::class);
+    }
+
+    public function student()
+    {
+        return $this->hasOne(Student::class);
+    }
+
+    /**
+     * Admin melihat seluruh data sekolah; guru dibatasi ke kelas & mapel yang
+     * diampu atau diwalikan.
+     */
+    public function isSchoolAdmin(): bool
+    {
+        return $this->hasAnyRole(['Superadmin', 'Admin Sekolah']);
     }
 }

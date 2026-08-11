@@ -23,19 +23,51 @@ import StudentDashboard from '../pages/StudentPortal/StudentDashboard';
 import StudentSPP from '../pages/StudentPortal/StudentSPP';
 import StudentGrades from '../pages/StudentPortal/StudentGrades';
 import StudentSchedules from '../pages/StudentPortal/StudentSchedules';
+import TeacherDashboard from '../pages/TeacherPortal/TeacherDashboard';
+import TeacherSchedules from '../pages/TeacherPortal/TeacherSchedules';
+import HomeroomClass from '../pages/TeacherPortal/HomeroomClass';
 import { useAuthStore } from '../store/authStore';
+import AccessLoading from './AccessLoading';
+import { isGuru } from '../utils/roles';
 
 /** Guard: hanya role Siswa yang bisa mengakses halaman portal siswa */
 function SiswaRoute({ children }) {
     const user = useAuthStore(state => state.user);
+    const userLoaded = useAuthStore(state => state.userLoaded);
+
+    // Tunggu data user termuat, kalau tidak siswa akan ditendang ke dashboard
+    // setiap kali me-refresh halaman portal
+    if (!userLoaded) return <AccessLoading />;
+
     const isSiswa = user?.roles?.includes('Siswa');
     if (!isSiswa) return <Navigate to="/" replace />;
     return children;
 }
 
-export default function AppRoutes() {
+/** Guard: hanya guru (role Guru, bukan admin sekolah) yang boleh masuk portal guru */
+function GuruRoute({ children }) {
     const user = useAuthStore(state => state.user);
-    const isSiswa = user?.roles?.includes('Siswa');
+    const userLoaded = useAuthStore(state => state.userLoaded);
+
+    if (!userLoaded) return <AccessLoading />;
+
+    if (!isGuru(user)) return <Navigate to="/" replace />;
+    return children;
+}
+
+/** Dashboard berbeda per role, jadi harus menunggu role diketahui dulu */
+function DashboardSwitch() {
+    const user = useAuthStore(state => state.user);
+    const userLoaded = useAuthStore(state => state.userLoaded);
+
+    if (!userLoaded) return <AccessLoading />;
+
+    if (user?.roles?.includes('Siswa')) return <StudentDashboard />;
+    if (isGuru(user)) return <TeacherDashboard />;
+    return <Dashboard />;
+}
+
+export default function AppRoutes() {
 
     return (
         <BrowserRouter>
@@ -47,7 +79,7 @@ export default function AppRoutes() {
                 <Route element={<ProtectedRoute />}>
                     <Route element={<AdminLayout />}>
                         {/* Dashboard: siswa → StudentDashboard, lainnya → Dashboard biasa */}
-                        <Route path="/" element={isSiswa ? <StudentDashboard /> : <Dashboard />} />
+                        <Route path="/" element={<DashboardSwitch />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/calendar" element={<AcademicCalendar />} />
                         <Route path="/announcements" element={<Announcements />} />
@@ -71,6 +103,9 @@ export default function AppRoutes() {
 
                         <Route element={<PermissionRoute permission="manage-academic" />}>
                             <Route path="/academic" element={<Academic />} />
+                        </Route>
+
+                        <Route element={<PermissionRoute permission="manage-grades" />}>
                             <Route path="/grades" element={<Grades />} />
                         </Route>
 
@@ -94,6 +129,10 @@ export default function AppRoutes() {
                         <Route element={<SuperadminRoute />}>
                             <Route path="/admin-panel" element={<AdminPanel />} />
                         </Route>
+
+                        {/* Portal Guru — hanya guru yang bisa akses */}
+                        <Route path="/my-teaching" element={<GuruRoute><TeacherSchedules /></GuruRoute>} />
+                        <Route path="/my-homeroom" element={<GuruRoute><HomeroomClass /></GuruRoute>} />
 
                         {/* Portal Siswa — hanya role Siswa yang bisa akses */}
                         <Route path="/my-spp" element={<SiswaRoute><StudentSPP /></SiswaRoute>} />

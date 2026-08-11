@@ -86,7 +86,7 @@ export default function TabJadwal({ teachers }) {
                 <button onClick={openCreate} className="btn-primary"><PlusCircle size={13}/> Tambah Jadwal</button>
             </div>
 
-            {/* â”€â”€ GRID VIEW â”€â”€ */}
+            {/* ── GRID VIEW ── */}
             {viewMode === 'grid' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {DAYS.map(day => {
@@ -121,7 +121,7 @@ export default function TabJadwal({ teachers }) {
                                                     </p>
                                                     <div className="flex flex-wrap items-center gap-2 mt-1">
                                                         <span className="text-xs flex items-center gap-1" style={{ color:'var(--text-muted)' }}>
-                                                            <Clock size={9}/> {s.start_time?.slice(0,5)}â€“{s.end_time?.slice(0,5)}
+                                                            <Clock size={9}/> {s.start_time?.slice(0,5)}–{s.end_time?.slice(0,5)}
                                                         </span>
                                                         {s.classroom && (
                                                             <span className="text-xs flex items-center gap-1" style={{ color:'var(--text-muted)' }}>
@@ -154,7 +154,7 @@ export default function TabJadwal({ teachers }) {
                 </div>
             )}
 
-            {/* â”€â”€ LIST VIEW â”€â”€ */}
+            {/* ── LIST VIEW ── */}
             {viewMode === 'list' && (
                 <div className="rounded-2xl overflow-hidden"
                     style={{ background:'var(--bg-card)', border:'1px solid var(--border-card)', boxShadow:'var(--shadow-card)' }}>
@@ -190,7 +190,7 @@ export default function TabJadwal({ teachers }) {
                                             <td className="py-3 px-4 text-sm" style={{ color:'var(--text-secondary)' }}>{s.classroom?.name || '-'}</td>
                                             <td className="py-3 px-4 text-sm font-medium" style={{ color:'var(--text-primary)' }}>{s.subject?.name || '-'}</td>
                                             <td className="py-3 px-4 text-xs font-mono" style={{ color:'var(--text-secondary)' }}>
-                                                {s.start_time?.slice(0,5)} â€“ {s.end_time?.slice(0,5)}
+                                                {s.start_time?.slice(0,5)} – {s.end_time?.slice(0,5)}
                                             </td>
                                             <td className="py-3 px-4 text-xs" style={{ color:'var(--text-muted)' }}>{s.room || '-'}</td>
                                             <td className="py-3 px-4 text-xs" style={{ color:'var(--text-secondary)' }}>{s.teacher?.name || '-'}</td>

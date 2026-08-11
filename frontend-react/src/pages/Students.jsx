@@ -9,13 +9,13 @@ import autoTable from 'jspdf-autotable';
 import Swal from 'sweetalert2';
 import { useForm } from 'react-hook-form';
 import ModernSelect from '../components/ModernSelect';
-import ModernDatepicker from '../components/ModernDatepicker';
 
 const labelClass = "block text-xs font-semibold uppercase tracking-wider mb-1.5";
 const labelStyle = { color: 'var(--text-label)' };
 
 export default function Students() {
     const [students, setStudents] = useState([]);
+    const [classrooms, setClassrooms] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
@@ -42,9 +42,15 @@ export default function Students() {
 
     useEffect(() => { fetchStudents(); }, [currentPage, itemsPerPage]);
 
+    useEffect(() => {
+        api.get('/classrooms')
+            .then(res => setClassrooms(res.data.data || []))
+            .catch(() => setClassrooms([]));
+    }, []);
+
     const openCreateModal = () => {
-        reset({ 
-            nisn: '', name: '', gender: 'L', religion: '', previous_school: '', 
+        reset({
+            nisn: '', name: '', gender: 'L', religion: '', previous_school: '', classroom_id: '',
             birth_place: '', birth_date: '', address: '', phone: '',
             father_name: '', mother_name: '', father_job: '', mother_job: '',
             parent_address_street: '', parent_address_village: '', parent_address_district: '',
@@ -57,7 +63,7 @@ export default function Students() {
     };
 
     const openEditModal = (student) => {
-        reset(student);
+        reset({ ...student, classroom_id: student.classroom_id ?? '' });
         setEditingId(student.id);
         setFormTab('pribadi');
         setIsModalOpen(true);
@@ -69,18 +75,27 @@ export default function Students() {
     };
 
     const onSubmit = async (data) => {
+        // Select mengirim '' saat kosong, sedangkan backend mengharapkan null
+        const payload = { ...data, classroom_id: data.classroom_id || null };
+
         try {
             if (editingId) {
-                await api.put(`/students/${editingId}`, data);
+                await api.put(`/students/${editingId}`, payload);
                 Swal.fire({ title: 'Sukses!', text: 'Data siswa diperbarui.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
             } else {
-                await api.post('/students', data);
+                await api.post('/students', payload);
                 Swal.fire({ title: 'Sukses!', text: 'Siswa baru ditambahkan.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
             }
             setIsModalOpen(false);
             fetchStudents();
-        } catch {
-            Swal.fire({ title: 'Error', text: 'Terjadi kesalahan atau NISN sudah ada', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+        } catch (err) {
+            // Tampilkan pesan validasi asli dari server, bukan tebakan generik
+            const validationErrors = err.response?.data?.errors;
+            const text = validationErrors
+                ? Object.values(validationErrors).flat().join('\n')
+                : err.response?.data?.message || 'Terjadi kesalahan saat menyimpan data';
+
+            Swal.fire({ title: 'Gagal Menyimpan', text, icon: 'error', background: '#0d1526', color: '#e2e8f0' });
         }
     };
 
@@ -244,6 +259,12 @@ export default function Students() {
                 </span>
             )
         },
+        {
+            header: 'Kelas', field: 'classroom_name',
+            render: (row) => row.classroom_name
+                ? <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{row.classroom_name}</span>
+                : <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Belum ada</span>
+        },
         { header: 'No HP', field: 'phone' },
         {
             header: 'Aksi', noPrint: true,
@@ -331,6 +352,7 @@ export default function Students() {
                                 <div><span className="block text-gray-500 text-xs">NISN</span> <span className="font-semibold text-gray-200">{viewData.nisn}</span></div>
                                 <div><span className="block text-gray-500 text-xs">Tempat, Tgl Lahir</span> <span className="font-semibold text-gray-200">{viewData.birth_place}, {viewData.birth_date}</span></div>
                                 <div><span className="block text-gray-500 text-xs">Jenis Kelamin</span> <span className="font-semibold text-gray-200">{viewData.gender === 'L' ? 'Laki-laki' : 'Perempuan'}</span></div>
+                                <div><span className="block text-gray-500 text-xs">Kelas</span> <span className="font-semibold text-gray-200">{viewData.classroom_name || '-'}</span></div>
                                 <div><span className="block text-gray-500 text-xs">Agama</span> <span className="font-semibold text-gray-200">{viewData.religion || '-'}</span></div>
                                 <div><span className="block text-gray-500 text-xs">Pendidikan Sebelumnya</span> <span className="font-semibold text-gray-200">{viewData.previous_school || '-'}</span></div>
                                 <div><span className="block text-gray-500 text-xs">No. Handphone</span> <span className="font-semibold text-gray-200">{viewData.phone || '-'}</span></div>
@@ -390,11 +412,13 @@ export default function Students() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label className={labelClass} style={labelStyle}>Tempat Lahir <span className="text-red-400">*</span></label>
-                                <input {...register('pob', { required: true })} className="input-dark w-full" placeholder="Kota lahir" />
+                                <input {...register('birth_place', { required: true })} className="input-dark w-full" placeholder="Kota lahir" />
+                                {errors.birth_place && <span className="text-xs mt-1 block" style={{ color: '#f87171' }}>Wajib diisi</span>}
                             </div>
                             <div>
                                 <label className={labelClass} style={labelStyle}>Tanggal Lahir <span className="text-red-400">*</span></label>
-                                <input type="date" {...register('dob', { required: true })} className="input-dark w-full" />
+                                <input type="date" {...register('birth_date', { required: true })} className="input-dark w-full" />
+                                {errors.birth_date && <span className="text-xs mt-1 block" style={{ color: '#f87171' }}>Wajib diisi</span>}
                             </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -421,6 +445,18 @@ export default function Students() {
                                 <label className={labelClass} style={labelStyle}>Pendidikan Sebelumnya</label>
                                 <input {...register('previous_school')} className="input-dark w-full" placeholder="SMP/MTs..." />
                             </div>
+                        </div>
+                        <div className="mb-4">
+                            <label className={labelClass} style={labelStyle}>Kelas</label>
+                            <ModernSelect {...register('classroom_id')} className="input-dark w-full">
+                                <option value="">-- Belum ditentukan --</option>
+                                {classrooms.map(c => (
+                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                ))}
+                            </ModernSelect>
+                            <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
+                                Menentukan nominal SPP, daftar siswa saat input nilai, dan jadwal di portal siswa.
+                            </p>
                         </div>
                         <div className="mb-4">
                             <label className={labelClass} style={labelStyle}>Alamat Peserta Didik <span className="text-red-400">*</span></label>

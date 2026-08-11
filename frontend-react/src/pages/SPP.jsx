@@ -19,7 +19,7 @@ const CURRENT_YEAR = `${CY}/${CY + 1}`;
 
 const fmt = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 
-/* â”€ Status Badge â”€ */
+/* ─ Status Badge ─ */
 const StatusBadge = ({ status }) => {
     const lunas = status === 'lunas';
     return (
@@ -35,9 +35,9 @@ const StatusBadge = ({ status }) => {
     );
 };
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   TAB 1 â€” TAGIHAN SPP
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ══════════════════════════════════════
+   TAB 1 — TAGIHAN SPP
+══════════════════════════════════════ */
 function TabTagihan() {
     const [bills, setBills]     = useState([]);
     const [summary, setSummary] = useState({});
@@ -132,7 +132,7 @@ function TabTagihan() {
         doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
         doc.text('LAPORAN SPP', 105, 13, { align: 'center' });
         doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(148, 163, 184);
-        doc.text(`${MONTHS[month]} ${year} â€” Total: ${fmt(summary.totalNominal)} â€” Lunas: ${fmt(summary.lunasNominal)}`, 105, 23, { align: 'center' });
+        doc.text(`${MONTHS[month]} ${year} — Total: ${fmt(summary.totalNominal)} — Lunas: ${fmt(summary.lunasNominal)}`, 105, 23, { align: 'center' });
 
         autoTable(doc, {
             startY: 36,
@@ -272,7 +272,7 @@ function TabTagihan() {
                                             style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }}
                                             onMouseEnter={e => e.currentTarget.style.background = 'rgba(16,185,129,0.22)'}
                                             onMouseLeave={e => e.currentTarget.style.background = 'rgba(16,185,129,0.12)'}>
-                                            âœ“ Lunaskan
+                                            ✓ Lunaskan
                                         </button>
                                     ) : (
                                         <button onClick={() => handleUnpay(b)}
@@ -280,7 +280,7 @@ function TabTagihan() {
                                             style={{ background: 'rgba(239,68,68,0.08)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}
                                             onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.16)'}
                                             onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}>
-                                            âœ• Batalkan
+                                            ✕ Batalkan
                                         </button>
                                     )}
                                 </td>
@@ -290,7 +290,7 @@ function TabTagihan() {
                 </table>
                 {bills.length > 0 && (
                     <div className="px-4 py-2.5 text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-footer)' }}>
-                        {bills.length} tagihan Â· {MONTHS[month]} {year}
+                        {bills.length} tagihan · {MONTHS[month]} {year}
                     </div>
                 )}
             </div>
@@ -298,9 +298,9 @@ function TabTagihan() {
     );
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   TAB 2 â€” PENGATURAN SPP
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ══════════════════════════════════════
+   TAB 2 — PENGATURAN SPP
+══════════════════════════════════════ */
 function TabSettings() {
     const [settings, setSettings] = useState(
         GRADES.map(g => ({ grade_level: g, amount: '', academic_year: CURRENT_YEAR, notes: '' }))
@@ -378,9 +378,9 @@ function TabSettings() {
     );
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   TAB 3 â€” REKAP TAHUNAN
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ══════════════════════════════════════
+   TAB 3 — REKAP TAHUNAN
+══════════════════════════════════════ */
 function TabRekap() {
     const [data, setData]   = useState([]);
     const [year, setYear]   = useState(CY);
@@ -457,7 +457,7 @@ function TabRekap() {
                                                 {d.persen_lunas}%
                                             </span>
                                         </div>
-                                    ) : <span className="text-xs" style={{ color: 'var(--text-muted)' }}>â€”</span>}
+                                    ) : <span className="text-xs" style={{ color: 'var(--text-muted)' }}>—</span>}
                                 </td>
                             </tr>
                         ))}
@@ -468,9 +468,9 @@ function TabRekap() {
     );
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ══════════════════════════════════════
    MAIN COMPONENT
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+══════════════════════════════════════ */
 export default function SPP() {
     const [tab, setTab] = useState('tagihan');
 

@@ -31,7 +31,7 @@ export default function Teachers() {
     useEffect(() => { fetchTeachers(); }, []);
 
     const openCreateModal = () => {
-        reset({ nip: '', name: '', position: '', subject: '', education: '', phone: '' });
+        reset({ nip: '', email: '', name: '', position: '', subject: '', education: '', phone: '' });
         setEditingId(null);
         setIsModalOpen(true);
     };
@@ -48,13 +48,37 @@ export default function Teachers() {
                 await api.put(`/teachers/${editingId}`, data);
                 Swal.fire({ title: 'Sukses!', text: 'Data guru diperbarui.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
             } else {
-                await api.post('/teachers', data);
-                Swal.fire({ title: 'Sukses!', text: 'Guru baru ditambahkan.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+                const res = await api.post('/teachers', data);
+                const account = res.data.account;
+
+                // Password akun guru hanya dikirim sekali oleh server — tampilkan
+                // supaya admin bisa menyerahkannya ke guru yang bersangkutan
+                if (account) {
+                    Swal.fire({
+                        title: 'Guru & Akun Login Dibuat',
+                        html: `<p style="margin-bottom:12px">Serahkan kredensial berikut ke guru. Password ini <b>tidak bisa dilihat lagi</b> setelah dialog ditutup.</p>
+                               <div style="text-align:left;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:12px">
+                                 <div style="font-size:12px;opacity:.7">Email</div>
+                                 <div style="font-weight:700;margin-bottom:8px">${account.email}</div>
+                                 <div style="font-size:12px;opacity:.7">Password</div>
+                                 <div style="font-weight:700;font-family:monospace;font-size:18px">${account.password}</div>
+                               </div>`,
+                        icon: 'success', background: '#0d1526', color: '#e2e8f0',
+                        confirmButtonText: 'Sudah saya catat',
+                    });
+                } else {
+                    Swal.fire({ title: 'Sukses!', text: 'Guru baru ditambahkan.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+                }
             }
             setIsModalOpen(false);
             fetchTeachers();
-        } catch {
-            Swal.fire({ title: 'Error', text: 'Terjadi kesalahan', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+        } catch (err) {
+            const validationErrors = err.response?.data?.errors;
+            const text = validationErrors
+                ? Object.values(validationErrors).flat().join('\n')
+                : err.response?.data?.message || 'Terjadi kesalahan saat menyimpan data';
+
+            Swal.fire({ title: 'Gagal Menyimpan', text, icon: 'error', background: '#0d1526', color: '#e2e8f0' });
         }
     };
 
@@ -305,6 +329,18 @@ export default function Teachers() {
                             <input {...register('name', { required: true })} className="input-dark" placeholder="Nama guru" />
                             {errors.name && <span className="text-xs mt-1 block" style={{ color: '#f87171' }}>Wajib diisi</span>}
                         </div>
+                    </div>
+                    <div>
+                        <label className={labelClass} style={labelStyle}>
+                            Email {!editingId && <span className="normal-case font-normal opacity-60">(untuk akun login guru)</span>}
+                        </label>
+                        <input type="email" {...register('email')} className="input-dark w-full" placeholder="guru@sekolah.id" />
+                        {!editingId && (
+                            <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
+                                Akun login dibuat otomatis. Kosongkan untuk memakai NIP sebagai email.
+                                Password acak akan ditampilkan sekali setelah disimpan.
+                            </p>
+                        )}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>

@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form';
 import ModernSelect from '../components/ModernSelect';
 import ModernDatepicker from '../components/ModernDatepicker';
 
-/* â”€â”€ Config â”€â”€ */
+/* ── Config ── */
 const CATEGORY_CFG = {
     umum:      { label: 'Umum',     color: '#60a5fa', bg: 'rgba(59,130,246,0.12)',  border: 'rgba(59,130,246,0.25)',  icon: Info },
     akademik:  { label: 'Akademik', color: '#a78bfa', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.25)', icon: BookOpen },
@@ -28,7 +28,7 @@ const PRIORITY_CFG = {
 const labelClass = 'block text-xs font-semibold uppercase tracking-wider mb-1.5';
 const labelStyle = { color: 'var(--text-label)' };
 
-/* â”€â”€ Format date â”€â”€ */
+/* ── Format date ── */
 const fmtDate = (d) => d
     ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     : '-';
@@ -48,7 +48,7 @@ export default function Announcements() {
     const watchCategory = watch('category', 'umum');
     const watchPriority = watch('priority', 'normal');
 
-    /* â”€â”€ Fetch â”€â”€ */
+    /* ── Fetch ── */
     const fetchAnnouncements = useCallback(async () => {
         setLoading(true);
         try {
@@ -74,7 +74,7 @@ export default function Announcements() {
 
     useEffect(() => { fetchAnnouncements(); }, [fetchAnnouncements]);
 
-    /* â”€â”€ Open modals â”€â”€ */
+    /* ── Open modals ── */
     const openCreate = () => {
         reset({ title: '', content: '', category: 'umum', priority: 'normal', is_published: true, expires_at: '' });
         setEditingId(null);
@@ -94,7 +94,7 @@ export default function Announcements() {
         setIsModalOpen(true);
     };
 
-    /* â”€â”€ Submit â”€â”€ */
+    /* ── Submit ── */
     const onSubmit = async (data) => {
         try {
             const payload = { ...data, is_published: data.is_published === true || data.is_published === 'true' };
@@ -112,7 +112,7 @@ export default function Announcements() {
         }
     };
 
-    /* â”€â”€ Delete â”€â”€ */
+    /* ── Delete ── */
     const handleDelete = (id) => {
         Swal.fire({
             title: 'Hapus pengumuman?',
@@ -134,7 +134,7 @@ export default function Announcements() {
         });
     };
 
-    /* â”€â”€ UI â”€â”€ */
+    /* ── UI ── */
     const actionBtn = (bg, color, border, hoverBg, icon, onClick, title) => (
         <button onClick={onClick} title={title}
             className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-150"
@@ -149,7 +149,7 @@ export default function Announcements() {
     return (
         <div className="p-6 space-y-5">
 
-            {/* â”€â”€ Page Header â”€â”€ */}
+            {/* ── Page Header ── */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -166,7 +166,7 @@ export default function Announcements() {
                 </button>
             </div>
 
-            {/* â”€â”€ Filter Bar â”€â”€ */}
+            {/* ── Filter Bar ── */}
             <div className="flex flex-wrap gap-3 items-center">
                 {/* Search */}
                 <div className="relative flex-1 min-w-48">
@@ -200,7 +200,7 @@ export default function Announcements() {
                 </div>
             </div>
 
-            {/* â”€â”€ Stats Row â”€â”€ */}
+            {/* ── Stats Row ── */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {Object.entries(CATEGORY_CFG).map(([key, cfg]) => {
                     const count = items.filter(a => a.category === key).length;
@@ -222,7 +222,7 @@ export default function Announcements() {
                 })}
             </div>
 
-            {/* â”€â”€ Announcements List â”€â”€ */}
+            {/* ── Announcements List ── */}
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-3">
                     <svg className="animate-spin w-8 h-8" viewBox="0 0 24 24" fill="none">
@@ -352,7 +352,7 @@ export default function Announcements() {
                 </div>
             )}
 
-            {/* â”€â”€ Modal Form â”€â”€ */}
+            {/* ── Modal Form ── */}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}
                 title={editingId ? 'Edit Pengumuman' : 'Buat Pengumuman Baru'}>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

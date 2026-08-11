@@ -37,7 +37,7 @@ class StudentPortalController extends Controller
         $attendancePercentage = $totalDays > 0 ? round(($presentDays / $totalDays) * 100) : 100;
 
         // 3. Tagihan Belum Lunas
-        $unpaidBills = SppBill::where('student_id', $student->id)->where('status', 'belum_lunas')->sum('amount');
+        $unpaidBills = SppBill::where('student_id', $student->id)->where('status', 'belum')->sum('amount');
 
         // 4. Nilai Terakhir
         $latestGrades = Grade::with('subject')->where('student_id', $student->id)->orderBy('updated_at', 'desc')->take(5)->get();
@@ -71,10 +71,21 @@ class StudentPortalController extends Controller
 
     public function schedules()
     {
-        // Currently, students are not strictly tied to classrooms in the database schema.
-        // We will just return all schedules or empty if we don't know the class.
-        // As a fallback for the portal, we return all schedules grouped by day.
-        $schedules = Schedule::with(['subject', 'classroom', 'teacher'])->get();
+        $student = $this->getStudent();
+        if (!$student) return response()->json(['message' => 'Student data not found'], 404);
+
+        if (!$student->classroom_id) {
+            return response()->json([
+                'data'    => [],
+                'message' => 'Anda belum terdaftar di kelas mana pun. Hubungi administrator sekolah.',
+            ]);
+        }
+
+        $schedules = Schedule::with(['subject', 'classroom', 'teacher'])
+            ->where('classroom_id', $student->classroom_id)
+            ->orderBy('start_time')
+            ->get();
+
         return response()->json(['data' => $schedules]);
     }
 }

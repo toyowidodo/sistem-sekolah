@@ -3,18 +3,29 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Student;
+use App\Services\TeachingScope;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller {
     public function index(Request $request) {
-        $date = $request->get('date', today()->toDateString());
+        $date        = $request->get('date', today()->toDateString());
+        $classroomId = $request->get('classroom_id');
 
-        // Ambil semua siswa aktif
-        $students = Student::where('is_active', true)->orderBy('name')->get();
+        if ($classroomId && !TeachingScope::canAccessClassroom($classroomId)) {
+            return response()->json(['message' => 'Anda tidak mengampu kelas ini.'], 403);
+        }
 
-        // Ambil absensi yang sudah ada untuk tanggal ini
-        $attendances = Attendance::with('student')
-            ->whereDate('date', $date)
+        // Ambil siswa aktif, dibatasi kelas yang dipilih / yang boleh diakses
+        $students = Student::where('is_active', true)
+            ->when($classroomId, fn($q) => $q->where('classroom_id', $classroomId))
+            ->when(!$classroomId, fn($q) => TeachingScope::applyToQuery($q))
+            ->orderBy('name')
+            ->get();
+
+        // Ambil absensi yang sudah ada untuk tanggal ini, hanya untuk siswa di atas
+        // supaya ringkasannya konsisten dengan daftar yang ditampilkan
+        $attendances = Attendance::whereDate('date', $date)
+            ->whereIn('student_id', $students->pluck('id'))
             ->get()
             ->keyBy('student_id');
 
@@ -60,6 +71,23 @@ class AttendanceController extends Controller {
         ]);
 
         $date = $request->date;
+
+        // Guru hanya boleh mengabsen siswa di kelas yang dia ampu atau walikan
+        if (TeachingScope::isRestricted()) {
+            $studentIds = collect($request->attendances)->pluck('student_id');
+            $allowed    = TeachingScope::allowedClassroomIds() ?: [0];
+
+            $outsideScope = Student::whereIn('id', $studentIds)
+                ->where(fn($q) => $q->whereNotIn('classroom_id', $allowed)->orWhereNull('classroom_id'))
+                ->exists();
+
+            if ($outsideScope) {
+                return response()->json([
+                    'message' => 'Ada siswa di luar kelas yang Anda ampu.'
+                ], 403);
+            }
+        }
+
         $saved = 0;
 
         foreach ($request->attendances as $item) {
@@ -78,10 +106,21 @@ class AttendanceController extends Controller {
     }
 
     public function summary(Request $request) {
-        $month = $request->get('month', now()->month);
-        $year  = $request->get('year', now()->year);
+        $month       = $request->get('month', now()->month);
+        $year        = $request->get('year', now()->year);
+        $classroomId = $request->get('classroom_id');
+
+        if ($classroomId && !TeachingScope::canAccessClassroom($classroomId)) {
+            return response()->json(['message' => 'Anda tidak mengampu kelas ini.'], 403);
+        }
+
+        $studentIds = Student::where('is_active', true)
+            ->when($classroomId, fn($q) => $q->where('classroom_id', $classroomId))
+            ->when(!$classroomId, fn($q) => TeachingScope::applyToQuery($q))
+            ->pluck('id');
 
         $data = Attendance::with('student')
+            ->whereIn('student_id', $studentIds)
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->get()

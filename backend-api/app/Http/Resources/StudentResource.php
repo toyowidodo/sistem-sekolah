@@ -22,6 +22,8 @@ class StudentResource extends JsonResource
             'phone' => $this->phone,
             'photo' => $this->photo,
             'is_active' => $this->is_active,
+            'classroom_id' => $this->classroom_id,
+            'classroom_name' => $this->whenLoaded('classroom', fn () => $this->classroom?->name),
             
             'father_name' => $this->father_name,
             'mother_name' => $this->mother_name,

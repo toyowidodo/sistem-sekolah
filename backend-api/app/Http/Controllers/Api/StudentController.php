@@ -39,7 +39,7 @@ class StudentController extends Controller
 
     public function show($id)
     {
-        $student = Student::findOrFail($id);
+        $student = Student::with('classroom')->findOrFail($id);
         return new StudentResource($student);
     }
 

@@ -28,7 +28,7 @@ export default function Attendance() {
     const [rekapMonth, setRekapMonth] = useState(new Date().getMonth() + 1);
     const [rekapYear, setRekapYear]   = useState(new Date().getFullYear());
 
-    /* â”€â”€ Fetch attendance for selected date â”€â”€ */
+    /* ── Fetch attendance for selected date ── */
     const fetchAttendance = useCallback(async (d) => {
         setLoading(true);
         try {
@@ -47,7 +47,7 @@ export default function Attendance() {
 
     useEffect(() => { fetchAttendance(date); }, [date, fetchAttendance]);
 
-    /* â”€â”€ Fetch rekap bulanan â”€â”€ */
+    /* ── Fetch rekap bulanan ── */
     const fetchRekap = useCallback(async () => {
         try {
             const res = await api.get(`/attendances/summary?month=${rekapMonth}&year=${rekapYear}`);
@@ -59,7 +59,7 @@ export default function Attendance() {
 
     useEffect(() => { if (tab === 'rekap') fetchRekap(); }, [tab, fetchRekap]);
 
-    /* â”€â”€ Update status per baris â”€â”€ */
+    /* ── Update status per baris ── */
     const handleStatusChange = (index, status) => {
         setRows(prev => prev.map((r, i) => i === index ? { ...r, status } : r));
         setDirty(true);
@@ -70,13 +70,13 @@ export default function Attendance() {
         setDirty(true);
     };
 
-    /* â”€â”€ Tandai semua hadir â”€â”€ */
+    /* ── Tandai semua hadir ── */
     const markAllHadir = () => {
         setRows(prev => prev.map(r => ({ ...r, status: 'hadir' })));
         setDirty(true);
     };
 
-    /* â”€â”€ Simpan absensi â”€â”€ */
+    /* ── Simpan absensi ── */
     const handleSave = async () => {
         const unset = rows.filter(r => !r.status);
         if (unset.length > 0) {
@@ -102,14 +102,14 @@ export default function Attendance() {
         }
     };
 
-    /* â”€â”€ Navigasi tanggal â”€â”€ */
+    /* ── Navigasi tanggal ── */
     const shiftDate = (days) => {
         const d = new Date(date);
         d.setDate(d.getDate() + days);
         setDate(d.toISOString().split('T')[0]);
     };
 
-    /* â”€â”€ Export PDF Harian â”€â”€ */
+    /* ── Export PDF Harian ── */
     const handleExportPDF = () => {
         const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         const tgl = new Date(date).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -163,7 +163,7 @@ export default function Attendance() {
     return (
         <div className="p-6 space-y-5">
 
-            {/* â”€â”€ Page Header â”€â”€ */}
+            {/* ── Page Header ── */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -196,7 +196,7 @@ export default function Attendance() {
                 </div>
             </div>
 
-            {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TAB: INPUT HARIAN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+            {/* ══════════════════ TAB: INPUT HARIAN ══════════════════ */}
             {tab === 'input' && (
                 <>
                     {/* Date Picker Row */}
@@ -361,7 +361,7 @@ export default function Attendance() {
                                     style={{ borderTop: '1px solid var(--border)', color: 'var(--text-footer)' }}>
                                     <span>{rows.length} siswa</span>
                                     <span className={dirty ? 'text-amber-400' : ''} style={{ color: dirty ? '#fbbf24' : 'var(--text-footer)' }}>
-                                        {dirty ? 'â— Ada perubahan yang belum disimpan' : `âœ“ Tersimpan â€” ${summary.recorded} dari ${summary.total} tercatat`}
+                                        {dirty ? '● Ada perubahan yang belum disimpan' : `✓ Tersimpan — ${summary.recorded} dari ${summary.total} tercatat`}
                                     </span>
                                 </div>
                             </>
@@ -370,7 +370,7 @@ export default function Attendance() {
                 </>
             )}
 
-            {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TAB: REKAP BULANAN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+            {/* ══════════════════ TAB: REKAP BULANAN ══════════════════ */}
             {tab === 'rekap' && (
                 <>
                     {/* Filter Row */}
@@ -398,7 +398,7 @@ export default function Attendance() {
                             doc.setFillColor(15, 23, 42);
                             doc.rect(0, 0, 297, 28, 'F');
                             doc.setFontSize(15); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
-                            doc.text(`REKAP ABSENSI â€” ${months[rekapMonth - 1]} ${rekapYear}`, 148, 13, { align: 'center' });
+                            doc.text(`REKAP ABSENSI — ${months[rekapMonth - 1]} ${rekapYear}`, 148, 13, { align: 'center' });
                             doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(148, 163, 184);
                             doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 148, 21, { align: 'center' });
 
@@ -473,7 +473,7 @@ export default function Attendance() {
                                     </tbody>
                                 </table>
                                 <div className="px-4 py-3 text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-footer)' }}>
-                                    Rekap {months[rekapMonth - 1]} {rekapYear} â€” {rekapData.length} siswa
+                                    Rekap {months[rekapMonth - 1]} {rekapYear} — {rekapData.length} siswa
                                 </div>
                             </div>
                         )}

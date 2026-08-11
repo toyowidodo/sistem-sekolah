@@ -60,7 +60,7 @@ export default function AcademicCalendar() {
 
     useEffect(() => { fetchEvents(); }, [fetchEvents]);
 
-    /* â”€â”€ Calendar grid â”€â”€ */
+    /* ── Calendar grid ── */
     const calendarDays = useMemo(() => {
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -95,12 +95,12 @@ export default function AcademicCalendar() {
         });
     };
 
-    /* â”€â”€ Navigation â”€â”€ */
+    /* ── Navigation ── */
     const prevMonth = () => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); };
     const nextMonth = () => { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); };
     const goToday = () => { setMonth(new Date().getMonth()); setYear(new Date().getFullYear()); };
 
-    /* â”€â”€ CRUD â”€â”€ */
+    /* ── CRUD ── */
     const openCreate = (dateStr) => {
         reset({ title: '', description: '', start_date: dateStr || '', end_date: '', category: 'akademik', priority: 'normal', color: '', is_holiday: false });
         setEditId(null); setIsOpen(true);
@@ -135,7 +135,7 @@ export default function AcademicCalendar() {
 
     const today = new Date();
 
-    /* â”€â”€ Stats â”€â”€ */
+    /* ── Stats ── */
     const stats = Object.entries(CAT_CFG).map(([key, cfg]) => ({
         ...cfg, key, count: events.filter(e => e.category === key).length,
     }));
@@ -222,7 +222,7 @@ export default function AcademicCalendar() {
                 ))}
             </div>
 
-            {/* â”€â”€ CALENDAR VIEW â”€â”€ */}
+            {/* ── CALENDAR VIEW ── */}
             {view === 'calendar' && (
                 <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', boxShadow: 'var(--shadow-card)' }}>
                     {/* Day headers */}
@@ -292,7 +292,7 @@ export default function AcademicCalendar() {
                 </div>
             )}
 
-            {/* â”€â”€ LIST VIEW â”€â”€ */}
+            {/* ── LIST VIEW ── */}
             {view === 'list' && (
                 <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', boxShadow: 'var(--shadow-card)' }}>
                     {events.length === 0 ? (
@@ -339,7 +339,7 @@ export default function AcademicCalendar() {
                                                 {evt.is_holiday && (
                                                     <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
                                                         style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}>
-                                                        ðŸ– Libur
+                                                        🏖 Libur
                                                     </span>
                                                 )}
                                             </div>
@@ -349,7 +349,7 @@ export default function AcademicCalendar() {
                                             <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
                                                 <Clock size={9} />
                                                 {fmtDate(evt.start_date)}
-                                                {evt.end_date && evt.end_date !== evt.start_date && ` â€” ${fmtDate(evt.end_date)}`}
+                                                {evt.end_date && evt.end_date !== evt.start_date && ` — ${fmtDate(evt.end_date)}`}
                                             </p>
                                         </div>
                                         {/* Actions */}
@@ -375,12 +375,12 @@ export default function AcademicCalendar() {
                         </div>
                     )}
                     <div className="px-4 py-3 text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-footer)' }}>
-                        {events.length} event Â· {MONTHS[month]} {year}
+                        {events.length} event · {MONTHS[month]} {year}
                     </div>
                 </div>
             )}
 
-            {/* â”€â”€ Selected Day Detail â”€â”€ */}
+            {/* ── Selected Day Detail ── */}
             {view === 'calendar' && selectedDay && (() => {
                 const dayEvts = getEventsForDate(selectedDay);
                 return (
@@ -421,7 +421,7 @@ export default function AcademicCalendar() {
                 );
             })()}
 
-            {/* â”€â”€ Modal â”€â”€ */}
+            {/* ── Modal ── */}
             <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title={editId ? 'Edit Event' : 'Tambah Event Baru'}>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div>

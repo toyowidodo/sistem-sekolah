@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class BackupController extends Controller
 {
@@ -15,7 +16,7 @@ class BackupController extends Controller
     {
         // Linux/Mac: gunakan 'which'
         if (PHP_OS_FAMILY !== 'Windows') {
-            $path = trim(shell_exec("which {$name}"));
+            $path = trim((string) shell_exec("which {$name}"));
             return (!empty($path) && file_exists($path)) ? $path : null;
         }
 
@@ -99,10 +100,13 @@ class BackupController extends Controller
                 ], 500);
             }
 
-            $file        = $request->file('backup_file');
-            $filename    = time() . '_restore.sql';
+            $file     = $request->file('backup_file');
+            $filename = time() . '_restore.sql';
+
+            // Disk 'local' di Laravel 11+ ber-root di storage/app/private, jadi path
+            // absolutnya harus diambil dari disk-nya, bukan dirakit manual.
             $file->storeAs('temp', $filename);
-            $storagePath = storage_path('app/temp/' . $filename);
+            $storagePath = Storage::disk('local')->path('temp/' . $filename);
 
             $passwordFlag = !empty($dbPass) ? "-p\"" . addslashes($dbPass) . "\"" : '';
             $command      = "\"$mysql\" -h $dbHost -P $dbPort -u \"$dbUser\" $passwordFlag \"$dbName\" < \"$storagePath\" 2>&1";

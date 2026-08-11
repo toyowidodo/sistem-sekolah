@@ -27,15 +27,21 @@ class TeacherController extends Controller
     public function store(TeacherStoreRequest $request)
     {
         $teacher = $this->teacherService->create($request);
+
         return response()->json([
-            'message' => 'Guru berhasil ditambahkan', 
-            'data' => new TeacherResource($teacher)
+            'message' => 'Guru berhasil ditambahkan',
+            'data'    => new TeacherResource($teacher),
+            // Password akun login hanya ditampilkan sekali di sini
+            'account' => $teacher->generated_password ? [
+                'email'    => $teacher->email,
+                'password' => $teacher->generated_password,
+            ] : null,
         ], 201);
     }
 
     public function show($id)
     {
-        $teacher = $this->teacherService->getAll(request())->find($id) ?? abort(404);
+        $teacher = \App\Models\Teacher::findOrFail($id);
         return new TeacherResource($teacher);
     }
 

@@ -7,12 +7,12 @@ use App\Models\Student;
 class StudentRepository implements StudentRepositoryInterface {
     public function all() { return Student::all(); }
     
-    public function paginate($perPage) { 
-        return Student::latest()->paginate($perPage); 
+    public function paginate($perPage) {
+        return Student::with('classroom')->latest()->paginate($perPage);
     }
-    
-    public function find($id) { 
-        return Student::findOrFail($id); 
+
+    public function find($id) {
+        return Student::with('classroom')->findOrFail($id);
     }
     
     public function create(array $data) { 

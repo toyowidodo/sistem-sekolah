@@ -20,7 +20,15 @@ class AuthController extends Controller
             return response()->json(['message' => 'Email atau Password salah'], 401);
         }
 
-        $user  = Auth::user();
+        $user = Auth::user();
+
+        if (!$user->is_active) {
+            Auth::logout();
+            return response()->json([
+                'message' => 'Akun Anda dinonaktifkan. Hubungi administrator sekolah.'
+            ], 403);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([

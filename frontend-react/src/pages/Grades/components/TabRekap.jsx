@@ -33,9 +33,9 @@ export default function TabRekap({ classrooms }) {
         doc.setFillColor(15, 23, 42);
         doc.rect(0, 0, 297, 28, 'F');
         doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
-        doc.text(`REKAP NILAI â€” ${classroomName}`, 148, 12, { align: 'center' });
+        doc.text(`REKAP NILAI — ${classroomName}`, 148, 12, { align: 'center' });
         doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(148, 163, 184);
-        doc.text(`Semester ${semester} Â· Tahun Ajaran ${academicYear}`, 148, 21, { align: 'center' });
+        doc.text(`Semester ${semester} · Tahun Ajaran ${academicYear}`, 148, 21, { align: 'center' });
 
         // Get all unique subjects
         const allSubjects = [...new Set(data.flatMap(s => s.subjects.map(sub => sub.subject)))];
@@ -156,7 +156,7 @@ export default function TabRekap({ classrooms }) {
                             </tbody>
                         </table>
                         <div className="px-4 py-3 text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-footer)' }}>
-                            {data.length} siswa Â· Semester {semester} Â· {academicYear}
+                            {data.length} siswa · Semester {semester} · {academicYear}
                         </div>
                     </div>
                 )}

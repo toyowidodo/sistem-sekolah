@@ -4,6 +4,7 @@ import { LayoutDashboard, Users, GraduationCap, Wallet, LogOut, School, ChevronR
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 import { useSettingsStore } from '../store/settingsStore';
+import { isGuru } from '../utils/roles';
 
 export default function AdminLayout() {
     const { user, fetchUser, logout, isAuthenticated } = useAuthStore();
@@ -36,7 +37,7 @@ export default function AdminLayout() {
         { name: 'Absensi',      path: '/attendance',    icon: ClipboardList, requiredPermission: 'manage-attendance' },
         { name: 'Kedisiplinan', path: '/student-points', icon: Award, requiredPermission: 'manage-student-points' },
         { name: 'Akademik',     path: '/academic',      icon: BookOpen, requiredPermission: 'manage-academic' },
-        { name: 'Nilai & Rapor',path: '/grades',        icon: Award, requiredPermission: 'manage-academic' },
+        { name: 'Nilai & Rapor',path: '/grades',        icon: Award, requiredPermission: 'manage-grades' },
         { name: 'Pengumuman',   path: '/announcements', icon: Megaphone },
         { name: 'Kalender',     path: '/calendar',      icon: CalendarDays },
         { name: 'Inventaris',   path: '/inventory',     icon: PackageSearch, requiredPermission: 'manage-inventory' },
@@ -50,6 +51,12 @@ export default function AdminLayout() {
         { name: 'Jadwal Kelas',    path: '/my-schedules',  icon: CalendarDays },
     ];
 
+    const teacherItems = [
+        { name: 'Dashboard Guru',   path: '/',             icon: LayoutDashboard, exact: true },
+        { name: 'Jadwal Mengajar',  path: '/my-teaching',  icon: CalendarDays },
+        { name: 'Kelas Perwalian',  path: '/my-homeroom',  icon: Users },
+    ];
+
     const superadminItems = [
         { name: 'Panel Admin',  path: '/admin-panel',   icon: Shield },
     ];
@@ -58,11 +65,16 @@ export default function AdminLayout() {
     const isSuperadmin = user?.roles?.includes('Superadmin');
     const userPermissions = user?.permissions || [];
 
-    const menuItems = isSiswa 
-        ? studentItems 
-        : adminItems.filter(item => 
-            isSuperadmin || !item.requiredPermission || userPermissions.includes(item.requiredPermission)
-        );
+    const allowedAdminItems = adminItems.filter(item =>
+        isSuperadmin || !item.requiredPermission || userPermissions.includes(item.requiredPermission)
+    );
+
+    const menuItems = isSiswa
+        ? studentItems
+        // Guru dapat menu portalnya sendiri di atas menu akademik biasa
+        : isGuru(user)
+            ? [...teacherItems, ...allowedAdminItems.filter(item => !item.exact)]
+            : allowedAdminItems;
 
     const isActive = (item) =>
         item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path);

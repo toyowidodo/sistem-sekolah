@@ -16,7 +16,7 @@ class UserController extends Controller
                 'name'       => $u->name,
                 'email'      => $u->email,
                 'roles'      => $u->getRoleNames(),
-                'is_active'  => $u->is_active ?? true,
+                'is_active'  => (bool) $u->is_active,
                 'created_at' => $u->created_at,
             ];
         });
@@ -73,9 +73,29 @@ class UserController extends Controller
         if (auth()->id() == $id) {
             return response()->json(['message' => 'Tidak bisa menonaktifkan akun sendiri'], 403);
         }
+
         $user = User::findOrFail($id);
-        // Add is_active column if it doesn't exist, use tokens as proxy
-        $user->tokens()->delete(); // revoke all tokens to force logout
-        return response()->json(['message' => 'Token user telah dicabut (paksa logout)']);
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        // Saat dinonaktifkan, cabut semua token supaya sesi yang sedang berjalan ikut berhenti
+        if (!$user->is_active) {
+            $user->tokens()->delete();
+        }
+
+        return response()->json([
+            'message'   => $user->is_active
+                ? "Akun {$user->name} diaktifkan kembali."
+                : "Akun {$user->name} dinonaktifkan dan sesinya dihentikan.",
+            'is_active' => $user->is_active,
+        ]);
+    }
+
+    public function forceLogout($id)
+    {
+        $user = User::findOrFail($id);
+        $user->tokens()->delete();
+
+        return response()->json(['message' => "Sesi {$user->name} telah dihentikan."]);
     }
 }
