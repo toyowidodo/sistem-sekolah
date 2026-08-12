@@ -25,3 +25,6 @@ logs/
 recover*.cjs
 split_*.cjs
 recovered_*.jsx
+
+# Hasil build frontend tidak di-commit; dibangun saat deploy
+assets/
