@@ -173,6 +173,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('users/{id}/toggle-active', [UserController::class, 'toggleActive']);
         Route::post('users/{id}/force-logout', [UserController::class, 'forceLogout']);
         Route::get('activity-logs', [ActivityLogController::class, 'index']);
+        Route::get('activity-logs/filters', [ActivityLogController::class, 'filters']);
         
         Route::get('permissions', [RoleController::class, 'permissions']);
         Route::apiResource('roles', RoleController::class)->only(['index', 'update']);

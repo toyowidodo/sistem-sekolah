@@ -2,9 +2,10 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogsActivity;
 
 class Schedule extends Model {
-    use HasFactory;
+    use HasFactory, LogsActivity;
     protected $fillable = ['classroom_id','subject_id','teacher_id','day','start_time','end_time','room'];
     
     public function classroom() { return $this->belongsTo(Classroom::class); }

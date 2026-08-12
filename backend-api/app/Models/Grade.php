@@ -2,9 +2,10 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogsActivity;
 
 class Grade extends Model {
-    use HasFactory;
+    use HasFactory, LogsActivity;
     protected $fillable = [
         'student_id','subject_id','classroom_id','teacher_id',
         'academic_year','semester','score_tugas','score_uts','score_uas',

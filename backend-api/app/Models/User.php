@@ -12,7 +12,13 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles, HasApiTokens;
+    use HasFactory, Notifiable, HasRoles, HasApiTokens, \App\Traits\LogsActivity;
+
+    /**
+     * Password & token tidak pernah masuk log (sudah dijamin di trait), tapi
+     * kolom teknis ini juga tidak perlu memenuhi riwayat audit.
+     */
+    protected array $activitylogExcept = ['email_verified_at', 'updated_at'];
 
     /**
      * The attributes that are mass assignable.
