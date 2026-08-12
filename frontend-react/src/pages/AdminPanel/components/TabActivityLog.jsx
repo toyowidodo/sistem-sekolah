@@ -1,14 +1,9 @@
 ﻿import { useEffect, useState, useCallback } from 'react';
 import api from '../../../api/axios';
-import Modal from '../../../components/Modal';
-import {
-    Shield, Users, Activity, PlusCircle, Edit, Trash2,
-    Search, RefreshCw, Key, Clock, Database, User,
-    ChevronDown, CheckCircle, XCircle, Zap, AlertTriangle, ToggleRight
-} from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { swal, labelClass, labelStyle, ROLE_CFG, EVENT_CFG, fmtDate, ActionBtn } from './Shared';
+import { Activity, Search, RefreshCw, Clock, Database, ChevronDown } from 'lucide-react';
+import { swal, EVENT_CFG, fmtDate } from './Shared';
 import ModernDatepicker from '../../../components/ModernDatepicker';
+import ModernSelect from '../../../components/ModernSelect';
 
 export default function TabActivityLog() {
     const [logs, setLogs]       = useState([]);
@@ -17,6 +12,11 @@ export default function TabActivityLog() {
     const [search, setSearch]   = useState('');
     const [dateFilter, setDate] = useState('');
     const [expanded, setExpanded] = useState(null);
+    const [subjectType, setSubjectType] = useState('');
+    const [eventFilter, setEventFilter] = useState('');
+    const [page, setPage]       = useState(1);
+    const [lastPage, setLastPage] = useState(1);
+    const [options, setOptions] = useState({ subject_types: [], events: [] });
 
     const fetch = useCallback(async () => {
         setLoading(true);
@@ -24,14 +24,30 @@ export default function TabActivityLog() {
             const params = new URLSearchParams();
             if (search) params.set('search', search);
             if (dateFilter) params.set('date', dateFilter);
+            if (subjectType) params.set('subject_type', subjectType);
+            if (eventFilter) params.set('event', eventFilter);
+            params.set('page', page);
+
             const r = await api.get(`/activity-logs?${params}`);
             setLogs(r.data.data || []);
             setTotal(r.data.total || 0);
+            setLastPage(r.data.last_page || 1);
         } catch { swal({ title:'Error', text:'Gagal memuat activity log', icon:'error' }); }
         finally { setLoading(false); }
-    }, [search, dateFilter]);
+    }, [search, dateFilter, subjectType, eventFilter, page]);
 
     useEffect(() => { fetch(); }, [fetch]);
+
+    // Isi dropdown filter dari modul & aksi yang benar-benar ada di log
+    useEffect(() => {
+        api.get('/activity-logs/filters')
+            .then(r => setOptions({ subject_types: r.data.subject_types || [], events: r.data.events || [] }))
+            .catch(() => {});
+    }, []);
+
+    // Filter apa pun yang berubah harus mengembalikan tampilan ke halaman 1,
+    // kalau tidak hasilnya bisa kosong karena masih menunjuk halaman lama
+    const changeFilter = (setter) => (value) => { setter(value); setPage(1); };
 
     return (
         <div className="space-y-4">
@@ -39,16 +55,33 @@ export default function TabActivityLog() {
             <div className="flex flex-wrap items-center gap-3">
                 <div className="relative flex-1 min-w-48">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color:'var(--text-muted)' }}/>
-                    <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+                    <input type="text" value={search} onChange={e => changeFilter(setSearch)(e.target.value)}
                         placeholder="Cari aktivitas atau deskripsi..." className="input-dark pl-9 text-sm w-full"/>
                 </div>
-                <ModernDatepicker  value={dateFilter} onChange={e => setDate(e.target.value)} className="input-dark text-sm w-36"/>
-                {dateFilter && <button onClick={() => setDate('')} className="btn-ghost">Reset</button>}
+
+                <ModernSelect value={subjectType} onChange={e => changeFilter(setSubjectType)(e.target.value)}
+                    className="input-dark text-sm">
+                    <option value="">Semua Modul</option>
+                    {options.subject_types.map(t => <option key={t} value={t}>{t}</option>)}
+                </ModernSelect>
+
+                <ModernSelect value={eventFilter} onChange={e => changeFilter(setEventFilter)(e.target.value)}
+                    className="input-dark text-sm">
+                    <option value="">Semua Aksi</option>
+                    {options.events.map(e => <option key={e} value={e}>{EVENT_CFG[e]?.label || e}</option>)}
+                </ModernSelect>
+
+                <ModernDatepicker value={dateFilter} onChange={e => changeFilter(setDate)(e.target.value)} className="input-dark text-sm w-36"/>
+                {(dateFilter || subjectType || eventFilter || search) && (
+                    <button onClick={() => { setSearch(''); setDate(''); setSubjectType(''); setEventFilter(''); setPage(1); }}
+                        className="btn-ghost">Reset</button>
+                )}
                 <button onClick={fetch} className="btn-ghost"><RefreshCw size={13}/> Refresh</button>
                 <span className="text-xs" style={{ color:'var(--text-muted)' }}>{total} aktivitas</span>
             </div>
 
-            {/* Stats row */}
+            {/* Stats row — dihitung dari baris yang sedang tampil, bukan seluruh log */}
+            <p className="text-xs" style={{ color:'var(--text-muted)' }}>Rincian aksi pada halaman ini:</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {Object.entries(EVENT_CFG).filter(([k]) => k !== 'default').map(([key, cfg]) => {
                     const count = logs.filter(l => l.event === key).length;
@@ -87,7 +120,7 @@ export default function TabActivityLog() {
                     <div className="absolute left-[22px] top-0 bottom-0 w-px" style={{ background:'var(--border)' }}/>
 
                     <div className="space-y-2 pl-12">
-                        {logs.map((log, i) => {
+                        {logs.map((log) => {
                             const ecfg = EVENT_CFG[log.event] || EVENT_CFG.default;
                             const isExp = expanded === log.id;
                             const props = log.properties;
@@ -161,6 +194,26 @@ export default function TabActivityLog() {
                                 </div>
                             );
                         })}
+                    </div>
+                </div>
+            )}
+
+            {/* Paginasi */}
+            {!loading && lastPage > 1 && (
+                <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl"
+                    style={{ background:'var(--bg-card)', border:'1px solid var(--border-card)' }}>
+                    <span className="text-xs" style={{ color:'var(--text-muted)' }}>
+                        Halaman {page} dari {lastPage}
+                    </span>
+                    <div className="flex items-center gap-2">
+                        <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
+                            className="btn-ghost" style={{ opacity: page <= 1 ? 0.4 : 1 }}>
+                            Sebelumnya
+                        </button>
+                        <button onClick={() => setPage(p => Math.min(lastPage, p + 1))} disabled={page >= lastPage}
+                            className="btn-ghost" style={{ opacity: page >= lastPage ? 0.4 : 1 }}>
+                            Berikutnya
+                        </button>
                     </div>
                 </div>
             )}

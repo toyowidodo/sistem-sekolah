@@ -26,9 +26,13 @@ import StudentSchedules from '../pages/StudentPortal/StudentSchedules';
 import TeacherDashboard from '../pages/TeacherPortal/TeacherDashboard';
 import TeacherSchedules from '../pages/TeacherPortal/TeacherSchedules';
 import HomeroomClass from '../pages/TeacherPortal/HomeroomClass';
+import ParentDashboard from '../pages/ParentPortal/ParentDashboard';
+import ParentGrades from '../pages/ParentPortal/ParentGrades';
+import ParentSPP from '../pages/ParentPortal/ParentSPP';
+import ParentAttendance from '../pages/ParentPortal/ParentAttendance';
 import { useAuthStore } from '../store/authStore';
 import AccessLoading from './AccessLoading';
-import { isGuru } from '../utils/roles';
+import { isGuru, isOrangTua } from '../utils/roles';
 
 /** Guard: hanya role Siswa yang bisa mengakses halaman portal siswa */
 function SiswaRoute({ children }) {
@@ -55,6 +59,17 @@ function GuruRoute({ children }) {
     return children;
 }
 
+/** Guard: hanya orang tua / wali yang boleh masuk portal orang tua */
+function OrangTuaRoute({ children }) {
+    const user = useAuthStore(state => state.user);
+    const userLoaded = useAuthStore(state => state.userLoaded);
+
+    if (!userLoaded) return <AccessLoading />;
+
+    if (!isOrangTua(user)) return <Navigate to="/" replace />;
+    return children;
+}
+
 /** Dashboard berbeda per role, jadi harus menunggu role diketahui dulu */
 function DashboardSwitch() {
     const user = useAuthStore(state => state.user);
@@ -63,6 +78,7 @@ function DashboardSwitch() {
     if (!userLoaded) return <AccessLoading />;
 
     if (user?.roles?.includes('Siswa')) return <StudentDashboard />;
+    if (isOrangTua(user)) return <ParentDashboard />;
     if (isGuru(user)) return <TeacherDashboard />;
     return <Dashboard />;
 }
@@ -133,6 +149,11 @@ export default function AppRoutes() {
                         {/* Portal Guru — hanya guru yang bisa akses */}
                         <Route path="/my-teaching" element={<GuruRoute><TeacherSchedules /></GuruRoute>} />
                         <Route path="/my-homeroom" element={<GuruRoute><HomeroomClass /></GuruRoute>} />
+
+                        {/* Portal Orang Tua */}
+                        <Route path="/anak/nilai"    element={<OrangTuaRoute><ParentGrades /></OrangTuaRoute>} />
+                        <Route path="/anak/spp"      element={<OrangTuaRoute><ParentSPP /></OrangTuaRoute>} />
+                        <Route path="/anak/absensi"  element={<OrangTuaRoute><ParentAttendance /></OrangTuaRoute>} />
 
                         {/* Portal Siswa — hanya role Siswa yang bisa akses */}
                         <Route path="/my-spp" element={<SiswaRoute><StudentSPP /></SiswaRoute>} />

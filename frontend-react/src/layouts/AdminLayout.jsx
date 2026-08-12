@@ -4,7 +4,7 @@ import { LayoutDashboard, Users, GraduationCap, Wallet, LogOut, School, ChevronR
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 import { useSettingsStore } from '../store/settingsStore';
-import { isGuru } from '../utils/roles';
+import { isGuru, isOrangTua } from '../utils/roles';
 
 export default function AdminLayout() {
     const { user, fetchUser, logout, isAuthenticated } = useAuthStore();
@@ -51,6 +51,13 @@ export default function AdminLayout() {
         { name: 'Jadwal Kelas',    path: '/my-schedules',  icon: CalendarDays },
     ];
 
+    const parentItems = [
+        { name: 'Dashboard Anak', path: '/',             icon: LayoutDashboard, exact: true },
+        { name: 'Nilai & Rapor',  path: '/anak/nilai',   icon: Award },
+        { name: 'Absensi',        path: '/anak/absensi', icon: ClipboardList },
+        { name: 'Tagihan SPP',    path: '/anak/spp',     icon: CreditCard },
+    ];
+
     const teacherItems = [
         { name: 'Dashboard Guru',   path: '/',             icon: LayoutDashboard, exact: true },
         { name: 'Jadwal Mengajar',  path: '/my-teaching',  icon: CalendarDays },
@@ -71,10 +78,12 @@ export default function AdminLayout() {
 
     const menuItems = isSiswa
         ? studentItems
-        // Guru dapat menu portalnya sendiri di atas menu akademik biasa
-        : isGuru(user)
-            ? [...teacherItems, ...allowedAdminItems.filter(item => !item.exact)]
-            : allowedAdminItems;
+        : isOrangTua(user)
+            ? parentItems
+            // Guru dapat menu portalnya sendiri di atas menu akademik biasa
+            : isGuru(user)
+                ? [...teacherItems, ...allowedAdminItems.filter(item => !item.exact)]
+                : allowedAdminItems;
 
     const isActive = (item) =>
         item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path);

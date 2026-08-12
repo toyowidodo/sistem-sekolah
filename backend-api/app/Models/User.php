@@ -12,7 +12,13 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles, HasApiTokens;
+    use HasFactory, Notifiable, HasRoles, HasApiTokens, \App\Traits\LogsActivity;
+
+    /**
+     * Password & token tidak pernah masuk log (sudah dijamin di trait), tapi
+     * kolom teknis ini juga tidak perlu memenuhi riwayat audit.
+     */
+    protected array $activitylogExcept = ['email_verified_at', 'updated_at'];
 
     /**
      * The attributes that are mass assignable.
@@ -58,6 +64,14 @@ class User extends Authenticatable
     public function student()
     {
         return $this->hasOne(Student::class);
+    }
+
+    /** Anak-anak yang diikuti akun ini (untuk role Orang Tua) */
+    public function children()
+    {
+        return $this->belongsToMany(Student::class, 'student_guardians')
+            ->withPivot('relation', 'phone')
+            ->withTimestamps();
     }
 
     /**

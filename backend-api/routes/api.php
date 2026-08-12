@@ -43,6 +43,11 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Modul Siswa
     Route::middleware('permission:manage-students')->group(function () {
+        // Akun orang tua / wali per siswa
+        Route::get('students/{student}/guardians', [\App\Http\Controllers\Api\GuardianController::class, 'index']);
+        Route::post('students/{student}/guardians', [\App\Http\Controllers\Api\GuardianController::class, 'store']);
+        Route::delete('students/{student}/guardians/{userId}', [\App\Http\Controllers\Api\GuardianController::class, 'destroy']);
+
         Route::get('students/import/template', [StudentController::class, 'downloadTemplate']);
         Route::post('students/import', [StudentController::class, 'importExcel']);
         Route::get('students/export/excel', [StudentController::class, 'exportExcel']);
@@ -90,8 +95,25 @@ Route::middleware('auth:sanctum')->group(function () {
     // terautentikasi. Perubahan datanya tetap butuh permission manage-academic.
     Route::get('classrooms', [ClassroomController::class, 'index']);
 
+    // Daftar tahun ajaran dibaca banyak modul (nilai, SPP, rapor)
+    Route::get('academic-years', [\App\Http\Controllers\Api\AcademicYearController::class, 'index']);
+
+    // Riwayat kelas siswa ditampilkan juga di detail data siswa, jadi tidak
+    // dikunci di balik manage-academic
+    Route::get('promotions/history/{studentId}', [\App\Http\Controllers\Api\PromotionController::class, 'history']);
+
     // Modul Akademik
     Route::middleware('permission:manage-academic')->group(function () {
+        // Tahun Ajaran
+        Route::post('academic-years', [\App\Http\Controllers\Api\AcademicYearController::class, 'store']);
+        Route::put('academic-years/{id}', [\App\Http\Controllers\Api\AcademicYearController::class, 'update']);
+        Route::delete('academic-years/{id}', [\App\Http\Controllers\Api\AcademicYearController::class, 'destroy']);
+        Route::post('academic-years/{id}/activate', [\App\Http\Controllers\Api\AcademicYearController::class, 'setActive']);
+
+        // Kenaikan Kelas
+        Route::get('promotions/preview', [\App\Http\Controllers\Api\PromotionController::class, 'preview']);
+        Route::post('promotions/execute', [\App\Http\Controllers\Api\PromotionController::class, 'execute']);
+
         Route::apiResource('classrooms', ClassroomController::class)->except(['show', 'index']);
         Route::apiResource('subjects', SubjectController::class)->except(['show']);
         Route::apiResource('schedules', ScheduleController::class)->except(['show']);
@@ -151,10 +173,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('users/{id}/toggle-active', [UserController::class, 'toggleActive']);
         Route::post('users/{id}/force-logout', [UserController::class, 'forceLogout']);
         Route::get('activity-logs', [ActivityLogController::class, 'index']);
+        Route::get('activity-logs/filters', [ActivityLogController::class, 'filters']);
         
         Route::get('permissions', [RoleController::class, 'permissions']);
         Route::apiResource('roles', RoleController::class)->only(['index', 'update']);
         
+        // Notifikasi keluar (WhatsApp/SMS)
+        Route::get('notifications/templates', [\App\Http\Controllers\Api\NotificationController::class, 'templates']);
+        Route::put('notifications/templates/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'updateTemplate']);
+        Route::get('notifications/logs', [\App\Http\Controllers\Api\NotificationController::class, 'logs']);
+        Route::post('notifications/test', [\App\Http\Controllers\Api\NotificationController::class, 'test']);
+
         Route::post('settings', [SettingController::class, 'update']);
         Route::post('maintenance/clear-cache', [\App\Http\Controllers\Api\MaintenanceController::class, 'clearCache']);
     });
@@ -165,6 +194,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('schedules', [\App\Http\Controllers\Api\TeacherPortalController::class, 'schedules']);
         Route::get('assignments', [\App\Http\Controllers\Api\TeacherPortalController::class, 'teachingAssignments']);
         Route::get('homeroom-students', [\App\Http\Controllers\Api\TeacherPortalController::class, 'homeroomStudents']);
+    });
+
+    // Portal Orang Tua
+    Route::middleware('role:Orang Tua')->prefix('parent')->group(function () {
+        Route::get('children', [\App\Http\Controllers\Api\ParentPortalController::class, 'children']);
+        Route::get('dashboard', [\App\Http\Controllers\Api\ParentPortalController::class, 'dashboard']);
+        Route::get('grades', [\App\Http\Controllers\Api\ParentPortalController::class, 'grades']);
+        Route::get('spp', [\App\Http\Controllers\Api\ParentPortalController::class, 'spp']);
+        Route::get('attendance', [\App\Http\Controllers\Api\ParentPortalController::class, 'attendance']);
+        Route::get('points', [\App\Http\Controllers\Api\ParentPortalController::class, 'points']);
     });
 
     // Student Portal

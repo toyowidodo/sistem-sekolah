@@ -2,10 +2,11 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogsActivity;
 
 class Student extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
     
     protected $fillable = [
         'nisn', 'name', 'gender', 'religion', 'previous_school', 'classroom_id',
@@ -29,6 +30,33 @@ class Student extends Model
     public function classroom()
     {
         return $this->belongsTo(Classroom::class);
+    }
+
+    /** Riwayat kelas siswa per tahun ajaran */
+    public function enrollments()
+    {
+        return $this->hasMany(StudentEnrollment::class);
+    }
+
+    /** Akun orang tua / wali yang memantau siswa ini */
+    public function guardians()
+    {
+        return $this->belongsToMany(User::class, 'student_guardians')
+            ->withPivot('relation', 'phone')
+            ->withTimestamps();
+    }
+
+    /**
+     * Kelas siswa pada tahun ajaran tertentu. Dipakai laporan historis supaya
+     * rapor tahun lalu tetap menunjuk kelas yang benar, bukan kelas sekarang.
+     */
+    public function classroomForYear(string $academicYear): ?Classroom
+    {
+        $enrollment = $this->enrollments()
+            ->where('academic_year', $academicYear)
+            ->first();
+
+        return $enrollment?->classroom ?? $this->classroom;
     }
 
     public function points()
