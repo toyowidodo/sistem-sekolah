@@ -36,7 +36,11 @@ jobs:
       - name: Siapkan Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # Harus sama mayor dengan Node di mesin pengembang (v24 -> npm 11).
+          # Dengan Node 20 (npm 10), `npm ci` menolak lockfile yang dibuat npm 11
+          # karena kedua versi menyusun pohon dependensi secara berbeda —
+          # @emnapi/* milik rolldown di-hoist berbeda antar versi npm.
+          node-version: '24'
           cache: npm
           cache-dependency-path: frontend-react/package-lock.json
 
