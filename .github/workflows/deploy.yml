@@ -1,0 +1,193 @@
+name: Deploy ke Produksi
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      jalankan_migrasi:
+        description: 'Jalankan migrasi database'
+        type: boolean
+        default: true
+
+# Dua deploy yang berjalan bersamaan bisa saling menimpa di tengah rsync.
+# Antrikan, dan jangan batalkan yang sedang berjalan agar tidak berhenti
+# separuh jalan dengan kode campur aduk di server.
+concurrency:
+  group: deploy-produksi
+  cancel-in-progress: false
+
+env:
+  REMOTE_ROOT: domains/niswa.online/public_html
+  # Nama folder aplikasi Laravel yang benar-benar melayani api.niswa.online
+  REMOTE_BACKEND: domains/niswa.online/public_html/backend
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Ambil kode
+        uses: actions/checkout@v4
+
+      # ── Frontend dibangun di runner karena server hosting tidak punya node ──
+      - name: Siapkan Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend-react/package-lock.json
+
+      - name: Pasang dependency frontend
+        working-directory: frontend-react
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend-react
+        # Alamat API diambil dari .env.production yang ikut di repo
+        run: npm run build
+
+      - name: Pastikan hasil build lengkap
+        working-directory: frontend-react
+        run: |
+          test -f dist/index.html || { echo "::error::dist/index.html tidak ada — build gagal"; exit 1; }
+          test -f dist/.htaccess || { echo "::error::dist/.htaccess tidak ada — routing SPA akan rusak"; exit 1; }
+          echo "Isi dist:"; ls -la dist
+
+      # ── Siapkan SSH ──
+      - name: Siapkan kunci SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # Host key diverifikasi, bukan diabaikan — mencegah man-in-the-middle
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Uji koneksi
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            'echo "Terhubung ke $(hostname)"'
+
+      # ── Cadangkan database sebelum apa pun diubah ──
+      - name: Cadangkan database
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            'set -e
+             cd ~/${{ env.REMOTE_BACKEND }}
+             mkdir -p ~/backups
+             TS=$(date +%Y%m%d-%H%M%S)
+             DB=$(grep "^DB_DATABASE=" .env | cut -d= -f2- | tr -d "\"\r")
+             DU=$(grep "^DB_USERNAME=" .env | cut -d= -f2- | tr -d "\"\r")
+             DP=$(grep "^DB_PASSWORD=" .env | cut -d= -f2- | tr -d "\"\r")
+             mysqldump -h 127.0.0.1 -u "$DU" -p"$DP" "$DB" > ~/backups/db-$TS.sql 2>/dev/null
+             echo "Cadangan: db-$TS.sql ($(du -h ~/backups/db-$TS.sql | cut -f1))"
+             # Simpan 10 cadangan terbaru saja agar kuota tidak penuh
+             ls -t ~/backups/db-*.sql 2>/dev/null | tail -n +11 | xargs -r rm --'
+
+      # ── Kirim backend ──
+      # Semua yang dikecualikan di bawah ini milik server, bukan repo. Kalau ikut
+      # tersinkron, --delete akan menghapusnya permanen:
+      #   .env             kredensial produksi
+      #   vendor/          dipasang di server oleh composer
+      #   storage/         gambar inventaris yang diunggah pengguna
+      #   public/storage/  salinan publik gambar tersebut
+      #   public/uploads/  logo sekolah yang diunggah lewat Pengaturan
+      #   database/*.sqlite  sisa lama, tidak dipakai (produksi memakai MySQL)
+      - name: Kirim kode backend
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }}" \
+            --exclude '.env' \
+            --exclude 'vendor/' \
+            --exclude 'storage/' \
+            --exclude 'bootstrap/cache/' \
+            --exclude 'public/storage/' \
+            --exclude 'public/uploads/' \
+            --exclude 'database/*.sqlite' \
+            --exclude '.git/' \
+            --exclude 'node_modules/' \
+            --exclude 'tests/' \
+            --exclude '.phpunit.result.cache' \
+            backend-api/ \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/${{ env.REMOTE_BACKEND }}/
+
+      # ── Kirim frontend ──
+      # --delete membersihkan aset build lama, tapi folder milik server
+      # dikecualikan agar tidak ikut terhapus.
+      - name: Kirim frontend
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }}" \
+            --exclude 'backend/' \
+            --exclude 'backend-api/' \
+            --exclude 'frontend-react/' \
+            --exclude '.git/' \
+            --exclude '.gitignore' \
+            --exclude '.well-known/' \
+            frontend-react/dist/ \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/${{ env.REMOTE_ROOT }}/
+
+      # ── Pasang dependency & migrasi di server ──
+      - name: Composer install
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            'set -e
+             cd ~/${{ env.REMOTE_BACKEND }}
+             composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist'
+
+      - name: Jalankan migrasi
+        if: github.event_name == 'push' || inputs.jalankan_migrasi
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            'set -e
+             cd ~/${{ env.REMOTE_BACKEND }}
+             # Cache lama dibuang dulu agar migrasi memakai konfigurasi terbaru
+             php artisan config:clear
+             php artisan migrate --force'
+
+      - name: Optimalkan untuk produksi
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            'set -e
+             cd ~/${{ env.REMOTE_BACKEND }}
+             php artisan config:cache
+             php artisan route:cache
+             php artisan cache:clear'
+
+      # ── Pastikan situs benar-benar hidup ──
+      - name: Verifikasi situs
+        run: |
+          set -e
+          fail=0
+
+          check() {
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$1")
+            if [ "$code" = "$2" ]; then
+              echo "OK   $1 -> $code"
+            else
+              echo "::error::$1 mengembalikan $code, seharusnya $2"
+              fail=1
+            fi
+          }
+
+          check https://niswa.online/                         200
+          check https://niswa.online/login                    200
+          check https://api.niswa.online/api/public-settings   200
+          check https://api.niswa.online/api/me                401
+
+          exit $fail
+
+      - name: Deploy gagal — cara memulihkan
+        if: failure()
+        run: |
+          echo "::warning::Deploy gagal. Cadangan database terbaru ada di ~/backups di server."
+          echo "Pulihkan kode dengan menjalankan ulang workflow ini dari commit yang diketahui baik,"
+          echo "atau ekstrak arsip backend-*.tar.gz di ~/backups."
