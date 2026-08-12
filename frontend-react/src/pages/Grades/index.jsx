@@ -5,19 +5,46 @@ import PremiumTabs from '../../components/PremiumTabs';
 import TabInputNilai from './components/TabInputNilai';
 import TabRekap from './components/TabRekap';
 import TabRapor from './components/TabRapor';
+import { useAuthStore } from '../../store/authStore';
+import { isGuru } from '../../utils/roles';
 
 export default function Grades() {
     const [tab, setTab]           = useState('input');
     const [classrooms, setClassrooms] = useState([]);
     const [subjects, setSubjects]     = useState([]);
 
+    const user = useAuthStore(state => state.user);
+    const guru = isGuru(user);
+
     useEffect(() => {
         Promise.all([api.get('/classrooms'), api.get('/subjects')])
-            .then(([cr, sr]) => {
-                setClassrooms(cr.data.data || []);
-                setSubjects(sr.data.data || []);
+            .then(async ([cr, sr]) => {
+                const allClassrooms = cr.data.data || [];
+                const allSubjects   = sr.data.data || [];
+
+                if (!guru) {
+                    setClassrooms(allClassrooms);
+                    setSubjects(allSubjects);
+                    return;
+                }
+
+                // Guru hanya boleh melihat kelas & mapel yang benar-benar dia ampu.
+                // Backend juga menolak di luar itu, ini agar pilihannya tidak menyesatkan.
+                try {
+                    const { data } = await api.get('/teacher/assignments');
+                    const assignments = data.data || [];
+                    const classroomIds = new Set(assignments.map(a => a.classroom_id));
+                    const subjectIds   = new Set(assignments.map(a => a.subject_id));
+                    (data.homeroom || []).forEach(c => classroomIds.add(c.id));
+
+                    setClassrooms(allClassrooms.filter(c => classroomIds.has(c.id)));
+                    setSubjects(allSubjects.filter(s => subjectIds.has(s.id)));
+                } catch {
+                    setClassrooms([]);
+                    setSubjects([]);
+                }
             }).catch(() => {});
-    }, []);
+    }, [guru]);
 
     const tabs = [
         { id: 'input', label: 'Input Nilai',    icon: BookOpen },

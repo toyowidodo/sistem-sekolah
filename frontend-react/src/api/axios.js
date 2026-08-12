@@ -29,11 +29,18 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // Token expired atau invalid
-            logger.warn('Unauthorized access, redirecting to login');
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/login';
+            // 401 dari endpoint login berarti kredensial salah, bukan sesi kedaluwarsa.
+            // Kalau ikut di-redirect, halaman reload dan pesan errornya hilang sebelum
+            // sempat tampil.
+            const isLoginRequest = error.config?.url?.includes('/login');
+            const alreadyOnLogin = window.location.pathname === '/login';
+
+            if (!isLoginRequest && !alreadyOnLogin) {
+                logger.warn('Unauthorized access, redirecting to login');
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            }
         } else if (error.response?.status === 403) {
             logger.warn('Access forbidden');
         } else if (error.response?.status >= 500) {

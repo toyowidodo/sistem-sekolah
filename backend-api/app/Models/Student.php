@@ -8,7 +8,7 @@ class Student extends Model
     use HasFactory;
     
     protected $fillable = [
-        'nisn', 'name', 'gender', 'religion', 'previous_school', 
+        'nisn', 'name', 'gender', 'religion', 'previous_school', 'classroom_id',
         'birth_place', 'birth_date', 'address', 'phone', 'photo', 'is_active',
         'father_name', 'mother_name', 'father_job', 'mother_job',
         'parent_address_street', 'parent_address_village', 'parent_address_district', 
@@ -24,6 +24,11 @@ class Student extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class);
     }
 
     public function points()

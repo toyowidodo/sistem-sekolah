@@ -24,6 +24,7 @@ class StudentStoreRequest extends FormRequest
             'previous_school' => 'nullable|string',
             'phone' => 'required|string|max:15',
             'is_active' => 'boolean',
+            'classroom_id' => 'nullable|exists:classrooms,id',
             
             // Parent & Guardian (Optional)
             'father_name' => 'nullable|string',

@@ -13,10 +13,10 @@ class RolePermissionSeeder extends Seeder
     {
         // Buat Permissions
         $permissions = [
-            'manage-users', 'manage-role', 'manage-students', 'manage-teachers', 
+            'manage-users', 'manage-role', 'manage-students', 'manage-teachers',
             'manage-finance', 'manage-attendance', 'manage-report', 'manage-academic',
             'manage-announcements', 'manage-inventory', 'manage-student-points', 'manage-spp',
-            'manage-eoffice'
+            'manage-eoffice', 'manage-grades'
         ];
         foreach ($permissions as $p) {
             Permission::firstOrCreate(['name' => $p]);
@@ -32,9 +32,12 @@ class RolePermissionSeeder extends Seeder
         Role::findByName('Superadmin')->syncPermissions(Permission::all());
         Role::findByName('Admin Sekolah')->syncPermissions(Permission::all());
 
-        // Guru
+        // Guru — sengaja TIDAK diberi manage-academic, karena permission itu mencakup
+        // pembuatan/penghapusan kelas, mapel, dan jadwal (master data sekolah).
+        // Guru cukup manage-grades untuk input nilai; cakupan kelas & mapel yang boleh
+        // disentuh dibatasi lagi per guru oleh App\Services\TeachingScope.
         Role::findByName('Guru')->syncPermissions([
-            'manage-attendance', 'manage-academic', 'manage-student-points', 'manage-announcements'
+            'manage-attendance', 'manage-grades', 'manage-student-points', 'manage-announcements'
         ]);
 
         // Tata Usaha

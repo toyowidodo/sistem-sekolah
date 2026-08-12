@@ -40,25 +40,41 @@ class SppController extends Controller
             'academic_year' => 'required|string',
         ]);
 
-        $students = Student::where('is_active', true)->get();
-        $generated = 0;
-        $skipped   = 0;
+        $students = Student::with('classroom')->where('is_active', true)->get();
+
+        // Ambil semua setting tahun ajaran ini sekali, lalu indeks per tingkat kelas
+        $settings = SppSetting::where('academic_year', $request->academic_year)
+            ->get()
+            ->keyBy(fn ($s) => strtoupper(trim($s->grade_level)));
+
+        $generated  = 0;
+        $skipped    = 0;
+        $noClassroom = 0;
+        $noSetting  = 0;
 
         foreach ($students as $student) {
-            // Cari setting nominal berdasarkan grade_level siswa
-            $gradeLevel = strtoupper(trim(explode(' ', $student->grade ?? 'X')[0]));
-            $setting = SppSetting::where('grade_level', $gradeLevel)
-                ->where('academic_year', $request->academic_year)
-                ->first();
-
-            $amount = $setting?->amount ?? 0;
-
             $exists = SppBill::where('student_id', $student->id)
                 ->where('month', $request->month)
                 ->where('year', $request->year)
                 ->exists();
 
             if ($exists) { $skipped++; continue; }
+
+            // Nominal ditentukan dari tingkat kelas siswa (classrooms.grade_level)
+            if (!$student->classroom) {
+                $noClassroom++;
+                continue;
+            }
+
+            $gradeLevel = strtoupper(trim($student->classroom->grade_level));
+            $setting    = $settings->get($gradeLevel);
+
+            if (!$setting) {
+                $noSetting++;
+                continue;
+            }
+
+            $amount = $setting->amount;
 
             SppBill::create([
                 'student_id'    => $student->id,
@@ -71,10 +87,20 @@ class SppController extends Controller
             $generated++;
         }
 
+        $message = "Berhasil membuat $generated tagihan. $skipped dilewati (sudah ada).";
+        if ($noClassroom > 0) {
+            $message .= " $noClassroom siswa dilewati karena belum punya kelas.";
+        }
+        if ($noSetting > 0) {
+            $message .= " $noSetting siswa dilewati karena tingkat kelasnya belum punya pengaturan nominal SPP untuk tahun ajaran ini.";
+        }
+
         return response()->json([
-            'message'   => "Berhasil membuat $generated tagihan. $skipped dilewati (sudah ada).",
-            'generated' => $generated,
-            'skipped'   => $skipped,
+            'message'      => $message,
+            'generated'    => $generated,
+            'skipped'      => $skipped,
+            'no_classroom' => $noClassroom,
+            'no_setting'   => $noSetting,
         ]);
     }
 

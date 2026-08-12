@@ -1,13 +1,12 @@
-﻿import { useEffect, useState, useCallback } from 'react';
+﻿import { useEffect, useState } from 'react';
 import api from '../../../api/axios';
 import Modal from '../../../components/Modal';
 import {
-    Shield, Users, Activity, PlusCircle, Edit, Trash2,
-    Search, RefreshCw, Key, Clock, Database, User,
-    ChevronDown, CheckCircle, XCircle, Zap, AlertTriangle, ToggleRight
+    Shield, PlusCircle, Edit, Trash2,
+    Search, RefreshCw, Key, CheckCircle, XCircle
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { swal, labelClass, labelStyle, ROLE_CFG, EVENT_CFG, fmtDate, ActionBtn } from './Shared';
+import { swal, labelClass, labelStyle, ROLE_CFG, ActionBtn } from './Shared';
 import ModernSelect from '../../../components/ModernSelect';
 
 export default function TabUsers() {
@@ -58,12 +57,36 @@ export default function TabUsers() {
         }
     });
 
-    const handleToggle = async (id, name) => {
+    const handleToggle = (u) => swal({
+        title: u.is_active ? `Nonaktifkan "${u.name}"?` : `Aktifkan kembali "${u.name}"?`,
+        text: u.is_active
+            ? 'User tidak akan bisa login lagi dan sesinya yang sedang berjalan dihentikan.'
+            : 'User akan bisa login kembali seperti biasa.',
+        icon: 'warning', showCancelButton: true,
+        confirmButtonColor: u.is_active ? '#ef4444' : '#10b981', cancelButtonColor: '#374151',
+        confirmButtonText: u.is_active ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan', cancelButtonText: 'Batal',
+    }).then(async r => {
+        if (!r.isConfirmed) return;
         try {
-            await api.post(`/users/${id}/toggle-active`);
-            swal({ title:'Sukses', text:`Token ${name} telah dicabut (paksa logout).`, icon:'success', timer:1800, showConfirmButton:false });
+            const res = await api.post(`/users/${u.id}/toggle-active`);
+            swal({ title:'Sukses', text: res.data.message, icon:'success', timer:1800, showConfirmButton:false });
+            fetch();
         } catch (e) { swal({ title:'Error', text: e.response?.data?.message || 'Gagal', icon:'error' }); }
-    };
+    });
+
+    const handleForceLogout = (u) => swal({
+        title: `Hentikan sesi "${u.name}"?`,
+        text: 'Semua token login user ini dicabut. User bisa login lagi setelahnya.',
+        icon: 'warning', showCancelButton: true,
+        confirmButtonColor: '#f59e0b', cancelButtonColor: '#374151',
+        confirmButtonText: 'Ya, Paksa Logout', cancelButtonText: 'Batal',
+    }).then(async r => {
+        if (!r.isConfirmed) return;
+        try {
+            const res = await api.post(`/users/${u.id}/force-logout`);
+            swal({ title:'Sukses', text: res.data.message, icon:'success', timer:1800, showConfirmButton:false });
+        } catch (e) { swal({ title:'Error', text: e.response?.data?.message || 'Gagal', icon:'error' }); }
+    });
 
     return (
         <div className="space-y-4">
@@ -121,14 +144,14 @@ export default function TabUsers() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr style={{ borderBottom:'1px solid var(--border)', background:'var(--bg-table-head)' }}>
-                                {['User','Email','Role','Bergabung','Aksi'].map((h,i) => (
+                                {['User','Email','Role','Status','Bergabung','Aksi'].map((h,i) => (
                                     <th key={i} className="py-3 px-4 text-xs font-semibold uppercase tracking-wider" style={{ color:'var(--text-th)' }}>{h}</th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody>
                             {filtered.length === 0 ? (
-                                <tr><td colSpan={5} className="py-12 text-center text-sm" style={{ color:'var(--text-muted)' }}>Tidak ada data user</td></tr>
+                                <tr><td colSpan={6} className="py-12 text-center text-sm" style={{ color:'var(--text-muted)' }}>Tidak ada data user</td></tr>
                             ) : filtered.map((u, i) => {
                                 const role = u.roles?.[0];
                                 const rcfg = ROLE_CFG[role] || ROLE_CFG['Tata Usaha'];
@@ -156,15 +179,31 @@ export default function TabUsers() {
                                                     style={{ background:rcfg.bg, color:rcfg.color, border:`1px solid ${rcfg.border}` }}>
                                                     <rcfg.icon size={10}/> {role}
                                                 </span>
-                                            ) : <span className="text-xs" style={{ color:'var(--text-muted)' }}>â€”</span>}
+                                            ) : <span className="text-xs" style={{ color:'var(--text-muted)' }}>—</span>}
+                                        </td>
+                                        <td className="py-3 px-4">
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap"
+                                                style={u.is_active
+                                                    ? { background:'rgba(16,185,129,0.1)', color:'#34d399', border:'1px solid rgba(16,185,129,0.2)' }
+                                                    : { background:'rgba(239,68,68,0.1)', color:'#f87171', border:'1px solid rgba(239,68,68,0.2)' }}>
+                                                {u.is_active ? <CheckCircle size={10}/> : <XCircle size={10}/>}
+                                                {u.is_active ? 'Aktif' : 'Nonaktif'}
+                                            </span>
                                         </td>
                                         <td className="py-3 px-4 text-xs whitespace-nowrap" style={{ color:'var(--text-muted)' }}>
                                             {u.created_at ? new Date(u.created_at).toLocaleDateString('id-ID') : '-'}
                                         </td>
                                         <td className="py-3 px-4">
                                             <div className="flex items-center gap-1.5">
+                                                {u.is_active ? (
+                                                    <ActionBtn bg="rgba(239,68,68,0.1)" color="#f87171" border="rgba(239,68,68,0.2)" hoverBg="rgba(239,68,68,0.22)"
+                                                        icon={<XCircle size={12}/>} onClick={() => handleToggle(u)} title="Nonaktifkan Akun"/>
+                                                ) : (
+                                                    <ActionBtn bg="rgba(16,185,129,0.1)" color="#34d399" border="rgba(16,185,129,0.2)" hoverBg="rgba(16,185,129,0.22)"
+                                                        icon={<CheckCircle size={12}/>} onClick={() => handleToggle(u)} title="Aktifkan Akun"/>
+                                                )}
                                                 <ActionBtn bg="rgba(245,158,11,0.1)" color="#fbbf24" border="rgba(245,158,11,0.2)" hoverBg="rgba(245,158,11,0.22)"
-                                                    icon={<Key size={12}/>} onClick={() => handleToggle(u.id, u.name)} title="Paksa Logout"/>
+                                                    icon={<Key size={12}/>} onClick={() => handleForceLogout(u)} title="Paksa Logout"/>
                                                 <ActionBtn bg="rgba(99,102,241,0.1)" color="#818cf8" border="rgba(99,102,241,0.2)" hoverBg="rgba(99,102,241,0.22)"
                                                     icon={<Edit size={12}/>} onClick={() => openEdit(u)} title="Edit"/>
                                                 <ActionBtn bg="rgba(239,68,68,0.1)" color="#f87171" border="rgba(239,68,68,0.2)" hoverBg="rgba(239,68,68,0.22)"
@@ -222,6 +261,6 @@ export default function TabUsers() {
     );
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   TAB 2 â€” ACTIVITY LOG
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════════════════════════════
+   TAB 2 — ACTIVITY LOG
+═══════════════════════════════════ */

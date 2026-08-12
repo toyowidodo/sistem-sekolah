@@ -29,9 +29,24 @@ class SettingController extends Controller
         ]);
     }
 
+    /**
+     * Key pengaturan yang boleh ditulis lewat API. Tanpa whitelist, field apa pun
+     * yang ikut terkirim (termasuk _method atau field form yang tidak disengaja)
+     * akan tersimpan sebagai baris setting.
+     */
+    private const ALLOWED_KEYS = [
+        'school_name',
+        'school_subtitle',
+        'school_address',
+        'school_phone',
+        'school_email',
+        'active_academic_year',
+        'active_semester',
+    ];
+
     public function update(Request $request)
     {
-        $data = $request->except('app_logo');
+        $data = $request->only(self::ALLOWED_KEYS);
 
         if ($request->hasFile('app_logo')) {
             $file     = $request->file('app_logo');

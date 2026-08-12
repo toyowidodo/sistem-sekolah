@@ -5,6 +5,7 @@ use App\Models\Grade;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Classroom;
+use App\Services\TeachingScope;
 use Illuminate\Http\Request;
 
 class GradeController extends Controller
@@ -17,8 +18,16 @@ class GradeController extends Controller
         $semester     = $request->semester ?? 1;
         $academicYear = $request->academic_year ?? date('Y').'/'.((int)date('Y')+1);
 
+        if ($classroomId && !TeachingScope::canAccessClassroom($classroomId)) {
+            return response()->json(['message' => 'Anda tidak mengampu kelas ini.'], 403);
+        }
+
         // Ambil semua siswa aktif di kelas ini
-        $students = Student::where('is_active', true)->orderBy('name')->get();
+        $students = Student::where('is_active', true)
+            ->when($classroomId, fn($q) => $q->where('classroom_id', $classroomId))
+            ->when(!$classroomId, fn($q) => TeachingScope::applyToQuery($q))
+            ->orderBy('name')
+            ->get();
 
         // Ambil nilai yang sudah ada
         $query = Grade::with(['student','subject'])
@@ -66,6 +75,13 @@ class GradeController extends Controller
             'grades.*.student_id' => 'required|exists:students,id',
         ]);
 
+        // Guru hanya boleh menyimpan nilai mapel yang benar-benar dia ampu di kelas itu
+        if (!TeachingScope::canManageGrades($request->classroom_id, $request->subject_id)) {
+            return response()->json([
+                'message' => 'Anda tidak mengampu mata pelajaran ini di kelas tersebut.'
+            ], 403);
+        }
+
         $saved = 0;
         foreach ($request->grades as $item) {
             $tugas = isset($item['score_tugas']) && $item['score_tugas'] !== '' ? (float)$item['score_tugas'] : null;
@@ -107,6 +123,11 @@ class GradeController extends Controller
         $academicYear = $request->academic_year ?? date('Y').'/'.((int)date('Y')+1);
 
         $student = Student::findOrFail($request->student_id);
+
+        if (!TeachingScope::canAccessClassroom($student->classroom_id)) {
+            return response()->json(['message' => 'Anda tidak mengampu kelas siswa ini.'], 403);
+        }
+
         $grades = Grade::with(['subject','classroom'])
             ->where('student_id', $request->student_id)
             ->where('semester', $semester)
@@ -135,7 +156,14 @@ class GradeController extends Controller
             ->where('semester', $semester)
             ->where('academic_year', $academicYear);
 
-        if ($request->classroom_id) $grades->where('classroom_id', $request->classroom_id);
+        if ($request->classroom_id) {
+            if (!TeachingScope::canAccessClassroom($request->classroom_id)) {
+                return response()->json(['message' => 'Anda tidak mengampu kelas ini.'], 403);
+            }
+            $grades->where('classroom_id', $request->classroom_id);
+        } else {
+            TeachingScope::applyToQuery($grades);
+        }
 
         $data = $grades->get()
             ->groupBy('student_id')

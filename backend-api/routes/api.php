@@ -21,7 +21,7 @@ use App\Http\Controllers\Api\SppController;
 use App\Http\Controllers\Api\AcademicEventController;
 use App\Http\Controllers\Api\SettingController;
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 
 Route::get('/public-settings', [SettingController::class, 'publicSettings']);
 
@@ -86,15 +86,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('announcements/{announcement}', [AnnouncementController::class, 'destroy']);
     });
 
+    // Daftar kelas dipakai juga oleh form data siswa, jadi dibuka untuk semua user
+    // terautentikasi. Perubahan datanya tetap butuh permission manage-academic.
+    Route::get('classrooms', [ClassroomController::class, 'index']);
+
     // Modul Akademik
     Route::middleware('permission:manage-academic')->group(function () {
-        Route::apiResource('classrooms', ClassroomController::class)->except(['show']);
+        Route::apiResource('classrooms', ClassroomController::class)->except(['show', 'index']);
         Route::apiResource('subjects', SubjectController::class)->except(['show']);
         Route::apiResource('schedules', ScheduleController::class)->except(['show']);
     });
 
-    // Modul Nilai & Rapor
-    Route::middleware('permission:manage-academic')->group(function () {
+    // Modul Nilai & Rapor — terpisah dari manage-academic supaya guru bisa input
+    // nilai tanpa ikut bisa mengubah master data kelas/mapel/jadwal
+    Route::middleware('permission:manage-grades')->group(function () {
         Route::get('grades', [GradeController::class, 'index']);
         Route::post('grades/bulk', [GradeController::class, 'storeBulk']);
         Route::get('grades/report', [GradeController::class, 'report']);
@@ -144,6 +149,7 @@ Route::middleware('auth:sanctum')->group(function () {
         
         Route::apiResource('users', UserController::class)->except(['show']);
         Route::post('users/{id}/toggle-active', [UserController::class, 'toggleActive']);
+        Route::post('users/{id}/force-logout', [UserController::class, 'forceLogout']);
         Route::get('activity-logs', [ActivityLogController::class, 'index']);
         
         Route::get('permissions', [RoleController::class, 'permissions']);
@@ -151,6 +157,14 @@ Route::middleware('auth:sanctum')->group(function () {
         
         Route::post('settings', [SettingController::class, 'update']);
         Route::post('maintenance/clear-cache', [\App\Http\Controllers\Api\MaintenanceController::class, 'clearCache']);
+    });
+
+    // Portal Guru — hanya untuk akun yang terhubung ke data guru
+    Route::prefix('teacher')->group(function () {
+        Route::get('dashboard', [\App\Http\Controllers\Api\TeacherPortalController::class, 'dashboard']);
+        Route::get('schedules', [\App\Http\Controllers\Api\TeacherPortalController::class, 'schedules']);
+        Route::get('assignments', [\App\Http\Controllers\Api\TeacherPortalController::class, 'teachingAssignments']);
+        Route::get('homeroom-students', [\App\Http\Controllers\Api\TeacherPortalController::class, 'homeroomStudents']);
     });
 
     // Student Portal

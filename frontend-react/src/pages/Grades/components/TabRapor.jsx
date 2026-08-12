@@ -41,8 +41,8 @@ export default function TabRapor() {
         doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
         doc.text('RAPOR SISWA', 105, 13, { align: 'center' });
         doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(148, 163, 184);
-        doc.text(`Semester ${report.semester} Â· Tahun Ajaran ${report.academic_year}`, 105, 21, { align: 'center' });
-        doc.text('SistemSekolah â€” EduAdmin', 105, 29, { align: 'center' });
+        doc.text(`Semester ${report.semester} · Tahun Ajaran ${report.academic_year}`, 105, 21, { align: 'center' });
+        doc.text('SistemSekolah — EduAdmin', 105, 29, { align: 'center' });
 
         // Student Info
         doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 41, 59);
@@ -102,7 +102,7 @@ export default function TabRapor() {
         doc.text('Kepala Sekolah', 140, finalY + 5);
         doc.line(130, finalY + 25, 190, finalY + 25);
         doc.setFontSize(7); doc.setTextColor(148, 163, 184);
-        doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')} â€” EduAdmin School System`, 105, doc.internal.pageSize.height - 5, { align:'center' });
+        doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')} — EduAdmin School System`, 105, doc.internal.pageSize.height - 5, { align:'center' });
 
         doc.save(`Rapor-${s.name}-Sem${report.semester}-${report.academic_year.replace('/','-')}.pdf`);
     };
@@ -117,7 +117,7 @@ export default function TabRapor() {
                     <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }}/>
                     <ModernSelect value={studentId} onChange={e => setStudentId(e.target.value)} className="input-dark text-sm pr-8 w-full appearance-none">
                         <option value="">Pilih Siswa</option>
-                        {students.map(s => <option key={s.id} value={s.id}>{s.name} â€” {s.nisn}</option>)}
+                        {students.map(s => <option key={s.id} value={s.id}>{s.name} — {s.nisn}</option>)}
                     </ModernSelect>
                 </div>
                 <div className="relative">
@@ -162,7 +162,7 @@ export default function TabRapor() {
                                     <h2 className="text-base font-bold" style={{ color:'var(--text-primary)' }}>{report.student?.name}</h2>
                                     <p className="text-xs font-mono" style={{ color:'var(--text-muted)' }}>NISN: {report.student?.nisn}</p>
                                     <p className="text-xs mt-0.5" style={{ color:'var(--text-secondary)' }}>
-                                        Semester {report.semester} Â· {report.academic_year}
+                                        Semester {report.semester} · {report.academic_year}
                                     </p>
                                 </div>
                             </div>
@@ -225,7 +225,7 @@ export default function TabRapor() {
                                                     {g.final_score !== null ? (
                                                         <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
                                                             style={{ background: tuntas?'rgba(16,185,129,0.12)':'rgba(239,68,68,0.12)', color: tuntas?'#34d399':'#f87171', border:`1px solid ${tuntas?'rgba(16,185,129,0.25)':'rgba(239,68,68,0.25)'}` }}>
-                                                            {tuntas ? 'âœ“ Tuntas' : 'âœ— Belum Tuntas'}
+                                                            {tuntas ? '✓ Tuntas' : '✗ Belum Tuntas'}
                                                         </span>
                                                     ) : <span className="text-xs" style={{ color:'var(--text-muted)' }}>-</span>}
                                                 </td>

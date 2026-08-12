@@ -178,10 +178,10 @@ export default function TabInputNilai({ classrooms, subjects }) {
                         <div className="px-4 py-2.5 flex items-center justify-between"
                             style={{ borderBottom: '1px solid var(--border)', background: 'rgba(99,102,241,0.05)' }}>
                             <p className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                                {classroomName} Â· {subjectName} Â· Sem {semester} Â· {academicYear}
+                                {classroomName} · {subjectName} · Sem {semester} · {academicYear}
                             </p>
                             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                                Bobot: Tugas 40% Â· UTS 30% Â· UAS 30%
+                                Bobot: Tugas 40% · UTS 30% · UAS 30%
                             </p>
                         </div>
                         {/* Table Head */}
@@ -233,7 +233,7 @@ export default function TabInputNilai({ classrooms, subjects }) {
                             style={{ borderTop: '1px solid var(--border)', color: 'var(--text-footer)' }}>
                             <span>{rows.length} siswa</span>
                             <span style={{ color: dirty ? '#fbbf24' : 'var(--text-footer)' }}>
-                                {dirty ? 'â— Ada perubahan yang belum disimpan' : 'âœ“ Data tersimpan'}
+                                {dirty ? '● Ada perubahan yang belum disimpan' : '✓ Data tersimpan'}
                             </span>
                         </div>
                     </>
