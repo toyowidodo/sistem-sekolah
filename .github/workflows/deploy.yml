@@ -44,9 +44,25 @@ jobs:
           cache: npm
           cache-dependency-path: frontend-react/package-lock.json
 
+      # Sengaja `npm install`, bukan `npm ci`.
+      #
+      # rolldown (bundler Vite 8) punya binding khusus per platform plus fallback
+      # WASM. Di Linux, npm menganggap @rolldown/binding-wasm32-wasi bisa dipasang
+      # sehingga @emnapi/* harus ada di level atas; di Windows paket itu tidak
+      # dipasang sehingga tidak tercatat. Akibatnya lockfile yang dibuat di mesin
+      # pengembang Windows SELALU ditolak `npm ci` di runner Linux:
+      #
+      #   npm error Missing: @emnapi/core@1.11.3 from lock file
+      #
+      # Sudah dicoba dan gagal: regenerasi lockfile, menyamakan versi Node/npm,
+      # dan `npm install --os=linux --cpu=x64 --package-lock-only`.
+      #
+      # `npm install` tetap menghormati versi yang terkunci di lockfile — yang
+      # diselesaikan ulang hanya dependency opsional per platform. --no-save
+      # menjaga lockfile tidak berubah di runner.
       - name: Pasang dependency frontend
         working-directory: frontend-react
-        run: npm ci
+        run: npm install --no-save --no-audit --no-fund
 
       - name: Build frontend
         working-directory: frontend-react
