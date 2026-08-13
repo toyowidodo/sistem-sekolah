@@ -2,13 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import api from '../api/axios';
 import Modal from '../components/Modal';
 import ModernSelect from '../components/ModernSelect';
-import Swal from 'sweetalert2';
 import { useForm } from 'react-hook-form';
 import { UserPlus, Trash2, Mail, Phone } from 'lucide-react';
+import { swal } from '../utils/swal';
 
 const labelClass = 'block text-xs font-semibold uppercase tracking-wider mb-1.5';
 const labelStyle = { color: 'var(--text-label)' };
-const swal = (opts) => swal({ ...opts });
 
 const RELATION_LABEL = { ayah: 'Ayah', ibu: 'Ibu', wali: 'Wali' };
 
