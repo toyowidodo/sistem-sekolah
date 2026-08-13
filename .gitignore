@@ -26,5 +26,16 @@ recover*.cjs
 split_*.cjs
 recovered_*.jsx
 
-# Hasil build frontend tidak di-commit; dibangun saat deploy
+# Hasil build frontend tidak di-commit; dibangun saat deploy.
+#
+# Selain itu, git deploy bawaan panel Hostinger mem-publish repo ini ke
+# public_html dan MEMPERTAHANKAN berkas yang cocok dengan .gitignore
+# ("Preserving paths matched by .gitignore" di log deploy-nya). Karena hasil
+# build tidak ada di repo, tanpa pola-pola ini setiap deploy panel akan
+# menghapus index.html dan menjatuhkan situs ke 403 — persis yang terjadi
+# pada 12 Agustus 2026 pukul 09:46.
 assets/
+/index.html
+/.htaccess
+/favicon.svg
+/icons.svg
