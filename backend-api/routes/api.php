@@ -37,6 +37,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/dashboard/setup-progress', [DashboardController::class, 'setupProgress']);
 
+    // Pencarian global untuk command palette (Ctrl+K)
+    Route::get('/search', \App\Http\Controllers\Api\SearchController::class);
+
     // Profil
     Route::get('profile', [ProfileController::class, 'show']);
     Route::put('profile', [ProfileController::class, 'update']);
