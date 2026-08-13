@@ -62,7 +62,7 @@ export default function TabTahunAjaran() {
         title: `Aktifkan ${y.name}?`,
         text: 'Tahun ajaran ini akan dipakai sebagai default di modul nilai, SPP, dan rapor.',
         icon: 'question', showCancelButton: true,
-        confirmButtonColor: '#10b981', cancelButtonColor: '#374151',
+        confirmButtonColor: '#10b981',
         confirmButtonText: 'Ya, Aktifkan', cancelButtonText: 'Batal',
     }).then(async r => {
         if (!r.isConfirmed) return;
@@ -78,7 +78,7 @@ export default function TabTahunAjaran() {
     const handleDelete = (y) => swal({
         title: `Hapus tahun ajaran ${y.name}?`,
         icon: 'warning', showCancelButton: true,
-        confirmButtonColor: '#ef4444', cancelButtonColor: '#374151',
+        confirmButtonColor: '#ef4444',
         confirmButtonText: 'Ya, Hapus', cancelButtonText: 'Batal',
     }).then(async r => {
         if (!r.isConfirmed) return;

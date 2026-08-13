@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { useForm } from 'react-hook-form';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { swal } from '../utils/swal';
 
 const labelClass = "block text-xs font-semibold uppercase tracking-wider mb-1.5";
 const labelStyle = { color: 'var(--text-label)' };
@@ -25,7 +26,7 @@ export default function Teachers() {
             const res = await api.get('/teachers?per_page=1000');
             setTeachers(res.data.data);
         } catch {
-            Swal.fire({ title: 'Error', text: 'Gagal memuat data guru', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Error', text: 'Gagal memuat data guru', icon: 'error' });
         }
     };
 
@@ -47,7 +48,7 @@ export default function Teachers() {
         try {
             if (editingId) {
                 await api.put(`/teachers/${editingId}`, data);
-                Swal.fire({ title: 'Sukses!', text: 'Data guru diperbarui.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+                swal({ title: 'Sukses!', text: 'Data guru diperbarui.', icon: 'success' });
             } else {
                 const res = await api.post('/teachers', data);
                 const account = res.data.account;
@@ -55,7 +56,7 @@ export default function Teachers() {
                 // Password akun guru hanya dikirim sekali oleh server — tampilkan
                 // supaya admin bisa menyerahkannya ke guru yang bersangkutan
                 if (account) {
-                    Swal.fire({
+                    swal({
                         title: 'Guru & Akun Login Dibuat',
                         html: `<p style="margin-bottom:12px">Serahkan kredensial berikut ke guru. Password ini <b>tidak bisa dilihat lagi</b> setelah dialog ditutup.</p>
                                <div style="text-align:left;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:12px">
@@ -64,11 +65,11 @@ export default function Teachers() {
                                  <div style="font-size:12px;opacity:.7">Password</div>
                                  <div style="font-weight:700;font-family:monospace;font-size:18px">${account.password}</div>
                                </div>`,
-                        icon: 'success', background: '#0d1526', color: '#e2e8f0',
-                        confirmButtonText: 'Sudah saya catat',
+                        icon: 'success',
+                        confirmButtonText: 'Sudah saya catat'
                     });
                 } else {
-                    Swal.fire({ title: 'Sukses!', text: 'Guru baru ditambahkan.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+                    swal({ title: 'Sukses!', text: 'Guru baru ditambahkan.', icon: 'success' });
                 }
             }
             setIsModalOpen(false);
@@ -79,26 +80,23 @@ export default function Teachers() {
                 ? Object.values(validationErrors).flat().join('\n')
                 : err.response?.data?.message || 'Terjadi kesalahan saat menyimpan data';
 
-            Swal.fire({ title: 'Gagal Menyimpan', text, icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Gagal Menyimpan', text, icon: 'error' });
         }
     };
 
     const handleDelete = async (id) => {
-        Swal.fire({
+        swal({
             title: 'Hapus data guru?',
             text: 'Data yang dihapus tidak bisa dikembalikan!',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#374151',
             confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal',
-            background: '#0d1526',
-            color: '#e2e8f0',
+            cancelButtonText: 'Batal'
         }).then(async (result) => {
             if (result.isConfirmed) {
                 await api.delete(`/teachers/${id}`);
-                Swal.fire({ title: 'Terhapus!', text: 'Data guru telah dihapus.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+                swal({ title: 'Terhapus!', text: 'Data guru telah dihapus.', icon: 'success' });
                 fetchTeachers();
             }
         });
@@ -116,7 +114,7 @@ export default function Teachers() {
             link.click();
             link.remove();
         } catch {
-            Swal.fire({ title: 'Error', text: 'Gagal export Excel', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Error', text: 'Gagal export Excel', icon: 'error' });
         }
     };
 
@@ -163,7 +161,7 @@ export default function Teachers() {
                     `Halaman ${data.pageNumber} dari ${pageCount}  •  Total: ${teachers.length} Guru`,
                     148, doc.internal.pageSize.height - 5, { align: 'center' }
                 );
-            },
+            }
         });
 
         doc.save(`Data-Guru-${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -177,12 +175,10 @@ export default function Teachers() {
         const formData = new FormData();
         formData.append('file', file);
 
-        Swal.fire({
+        swal({
             title: 'Mengunggah...',
             text: 'Harap tunggu, sistem sedang memproses data guru',
-            allowOutsideClick: false,
-            background: '#0d1526',
-            color: '#e2e8f0',
+            allowOutsideClick: false,
             didOpen: () => { Swal.showLoading(); }
         });
 
@@ -190,10 +186,10 @@ export default function Teachers() {
             await api.post('/teachers/import', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            Swal.fire({ title: 'Berhasil!', text: 'Data guru berhasil diunggah', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Berhasil!', text: 'Data guru berhasil diunggah', icon: 'success' });
             fetchTeachers();
         } catch (err) {
-            Swal.fire({ title: 'Gagal', text: err.response?.data?.message || 'Gagal mengunggah data', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Gagal', text: err.response?.data?.message || 'Gagal mengunggah data', icon: 'error' });
         }
 
         e.target.value = null;
@@ -211,7 +207,7 @@ export default function Teachers() {
             link.click();
             link.remove();
         } catch {
-            Swal.fire({ title: 'Error', text: 'Gagal mengunduh template', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Error', text: 'Gagal mengunduh template', icon: 'error' });
         }
     };
 
@@ -238,7 +234,7 @@ export default function Teachers() {
                     display: 'inline-flex', alignItems: 'center', padding: '2px 10px', borderRadius: '99px',
                     fontSize: '11px', fontWeight: 500,
                     background: 'rgba(6,182,212,0.12)', color: '#67e8f9',
-                    border: '1px solid rgba(6,182,212,0.2)',
+                    border: '1px solid rgba(6,182,212,0.2)'
                 }}>
                     {row.position}
                 </span>

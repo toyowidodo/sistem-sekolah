@@ -1,9 +1,8 @@
 
 import { Award, BookOpen, Save, FileText, ChevronDown, RefreshCw, TrendingUp, Star, Medal } from 'lucide-react';
-import Swal from 'sweetalert2';
 
 
-export const swal = (opts) => Swal.fire({ background: '#0d1526', color: '#e2e8f0', ...opts });
+export { swal } from '../../../utils/swal';
 
 export const GRADE_CFG = {
     A: { color: '#34d399', bg: 'rgba(16,185,129,0.15)',  border: 'rgba(16,185,129,0.3)',  label: 'Sangat Baik' },
@@ -11,7 +10,7 @@ export const GRADE_CFG = {
     C: { color: '#fbbf24', bg: 'rgba(245,158,11,0.15)',  border: 'rgba(245,158,11,0.3)',  label: 'Cukup' },
     D: { color: '#f97316', bg: 'rgba(249,115,22,0.15)',  border: 'rgba(249,115,22,0.3)',  label: 'Kurang' },
     E: { color: '#f87171', bg: 'rgba(239,68,68,0.15)',   border: 'rgba(239,68,68,0.3)',   label: 'Sangat Kurang' },
-    '-':{ color: '#94a3b8', bg: 'rgba(148,163,184,0.1)', border: 'rgba(148,163,184,0.2)', label: '-' },
+    '-':{ color: '#94a3b8', bg: 'rgba(148,163,184,0.1)', border: 'rgba(148,163,184,0.2)', label: '-' }
 };
 
 export const GradeBadge = ({ letter }) => {

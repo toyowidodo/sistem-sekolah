@@ -8,7 +8,7 @@ import { UserPlus, Trash2, Mail, Phone } from 'lucide-react';
 
 const labelClass = 'block text-xs font-semibold uppercase tracking-wider mb-1.5';
 const labelStyle = { color: 'var(--text-label)' };
-const swal = (opts) => Swal.fire({ background: '#0d1526', color: '#e2e8f0', ...opts });
+const swal = (opts) => swal({ ...opts });
 
 const RELATION_LABEL = { ayah: 'Ayah', ibu: 'Ibu', wali: 'Wali' };
 
@@ -55,7 +55,7 @@ export default function GuardianModal({ student, isOpen, onClose }) {
                              <div style="font-size:12px;opacity:.7">Password</div>
                              <div style="font-weight:700;font-family:monospace;font-size:18px">${account.password}</div>
                            </div>`,
-                    icon: 'success', confirmButtonText: 'Sudah saya catat',
+                    icon: 'success', confirmButtonText: 'Sudah saya catat'
                 });
             } else {
                 swal({ title: 'Terhubung', text: res.data.message, icon: 'success', timer: 2000, showConfirmButton: false });
@@ -68,7 +68,7 @@ export default function GuardianModal({ student, isOpen, onClose }) {
             swal({
                 title: 'Gagal',
                 text: v ? Object.values(v).flat().join('\n') : err.response?.data?.message || 'Terjadi kesalahan',
-                icon: 'error',
+                icon: 'error'
             });
         }
     };
@@ -77,8 +77,8 @@ export default function GuardianModal({ student, isOpen, onClose }) {
         title: `Putuskan akses ${g.name}?`,
         text: 'Akun ini tidak akan bisa lagi melihat data siswa tersebut.',
         icon: 'warning', showCancelButton: true,
-        confirmButtonColor: '#ef4444', cancelButtonColor: '#374151',
-        confirmButtonText: 'Ya, Putuskan', cancelButtonText: 'Batal',
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'Ya, Putuskan', cancelButtonText: 'Batal'
     }).then(async r => {
         if (!r.isConfirmed) return;
         try {

@@ -3,9 +3,8 @@ import { useForm } from 'react-hook-form';
 import { User, Mail, Lock, Shield, Edit3, Save, X, CheckCircle, Eye, EyeOff, Key } from 'lucide-react';
 import api from '../api/axios';
 import { useAuthStore } from '../store/authStore';
-import Swal from 'sweetalert2';
 
-const swal = (opts) => Swal.fire({ background: '#0d1526', color: '#e2e8f0', ...opts });
+const swal = (opts) => swal({ ...opts });
 
 const ROLE_CFG = {
     'Superadmin':    { color: '#f87171', bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.3)',   label: 'Superadmin' },
@@ -14,7 +13,7 @@ const ROLE_CFG = {
     'Tata Usaha':    { color: '#60a5fa', bg: 'rgba(59,130,246,0.12)',  border: 'rgba(59,130,246,0.3)',  label: 'Tata Usaha' },
     'Bendahara':     { color: '#fbbf24', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.3)',  label: 'Bendahara' },
     'Siswa':         { color: '#a78bfa', bg: 'rgba(139,92,246,0.12)',  border: 'rgba(139,92,246,0.3)',  label: 'Siswa' },
-    'Orang Tua':     { color: '#67e8f9', bg: 'rgba(6,182,212,0.12)',   border: 'rgba(6,182,212,0.3)',   label: 'Orang Tua' },
+    'Orang Tua':     { color: '#67e8f9', bg: 'rgba(6,182,212,0.12)',   border: 'rgba(6,182,212,0.3)',   label: 'Orang Tua' }
 };
 
 const labelClass = 'block text-xs font-semibold uppercase tracking-wider mb-1.5';
@@ -86,7 +85,7 @@ export default function Profile() {
             await api.put('/profile/password', {
                 current_password: data.current_password,
                 new_password: data.new_password,
-                new_password_confirmation: data.confirm_password,
+                new_password_confirmation: data.confirm_password
             });
             setPwdSuccess(true);
             pwdForm.reset();
@@ -180,7 +179,7 @@ export default function Profile() {
                 style={{
                     background: 'var(--bg-card)',
                     border: `1px solid ${editMode ? 'rgba(99,102,241,0.4)' : 'var(--border-card)'}`,
-                    boxShadow: 'var(--shadow-card)',
+                    boxShadow: 'var(--shadow-card)'
                 }}>
                 <div className="px-5 py-4 flex items-center gap-2"
                     style={{ borderBottom: '1px solid var(--border)', background: editMode ? 'rgba(99,102,241,0.04)' : 'transparent' }}>

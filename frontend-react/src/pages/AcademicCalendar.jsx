@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form';
 import ModernSelect from '../components/ModernSelect';
 import ModernDatepicker from '../components/ModernDatepicker';
 
-const swal = (opts) => Swal.fire({ background: '#0d1526', color: '#e2e8f0', ...opts });
+const swal = (opts) => swal({ ...opts });
 
 const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -23,13 +23,13 @@ const CAT_CFG = {
     libur:    { color: '#ef4444', bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.25)',   icon: Coffee,        label: 'Libur' },
     kegiatan: { color: '#10b981', bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.25)',  icon: Star,          label: 'Kegiatan' },
     rapat:    { color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)',  border: 'rgba(139,92,246,0.25)',  icon: UsersIcon,     label: 'Rapat' },
-    lainnya:  { color: '#64748b', bg: 'rgba(100,116,139,0.12)', border: 'rgba(100,116,139,0.25)', icon: MoreHorizontal,label: 'Lainnya' },
+    lainnya:  { color: '#64748b', bg: 'rgba(100,116,139,0.12)', border: 'rgba(100,116,139,0.25)', icon: MoreHorizontal,label: 'Lainnya' }
 };
 
 const PRIORITY_CFG = {
     normal:  { color: '#94a3b8', bg: 'rgba(148,163,184,0.1)', border: 'rgba(148,163,184,0.2)' },
     penting: { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.2)' },
-    urgent:  { color: '#ef4444', bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.2)' },
+    urgent:  { color: '#ef4444', bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.2)' }
 };
 
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
@@ -109,7 +109,7 @@ export default function AcademicCalendar() {
         reset({
             title: evt.title, description: evt.description || '',
             start_date: evt.start_date?.split('T')[0], end_date: evt.end_date?.split('T')[0] || '',
-            category: evt.category, priority: evt.priority, color: evt.color || '', is_holiday: evt.is_holiday,
+            category: evt.category, priority: evt.priority, color: evt.color || '', is_holiday: evt.is_holiday
         });
         setEditId(evt.id); setIsOpen(true);
     };
@@ -125,8 +125,8 @@ export default function AcademicCalendar() {
 
     const handleDelete = (evt) => swal({
         title: `Hapus "${evt.title}"?`, icon: 'warning', showCancelButton: true,
-        confirmButtonColor: '#ef4444', cancelButtonColor: '#374151',
-        confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal',
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal'
     }).then(async r => {
         if (r.isConfirmed) {
             try { await api.delete(`/academic-events/${evt.id}`); fetchEvents(); } catch { }
@@ -137,7 +137,7 @@ export default function AcademicCalendar() {
 
     /* ── Stats ── */
     const stats = Object.entries(CAT_CFG).map(([key, cfg]) => ({
-        ...cfg, key, count: events.filter(e => e.category === key).length,
+        ...cfg, key, count: events.filter(e => e.category === key).length
     }));
 
     return (
@@ -250,7 +250,7 @@ export default function AcademicCalendar() {
                                         borderRight: (i + 1) % 7 !== 0 ? '1px solid var(--border)' : 'none',
                                         borderBottom: '1px solid var(--border)',
                                         background: isSelected ? 'rgba(99,102,241,0.06)' : !d.current ? 'var(--bg-table-even)' : 'transparent',
-                                        opacity: d.current ? 1 : 0.35,
+                                        opacity: d.current ? 1 : 0.35
                                     }}
                                     onClick={() => { if (d.current) setSelectedDay(d.date); }}
                                     onDoubleClick={() => { if (d.current) openCreate(d.date.toISOString().split('T')[0]); }}
@@ -260,7 +260,7 @@ export default function AcademicCalendar() {
                                         <span className={`text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'text-white' : ''}`}
                                             style={{
                                                 color: isToday ? '#fff' : isSunday || hasHoliday ? '#f87171' : 'var(--text-secondary)',
-                                                background: isToday ? '#6366f1' : 'transparent',
+                                                background: isToday ? '#6366f1' : 'transparent'
                                             }}>
                                             {d.day}
                                         </span>

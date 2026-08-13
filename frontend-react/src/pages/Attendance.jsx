@@ -7,12 +7,13 @@ import Swal from 'sweetalert2';
 import ModernSelect from '../components/ModernSelect';
 import ModernDatepicker from '../components/ModernDatepicker';
 import EmptyState from '../components/EmptyState';
+import { swal } from '../utils/swal';
 
 const STATUS_CONFIG = {
     hadir: { label: 'Hadir',  color: '#34d399', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.25)', icon: CheckCircle },
     sakit: { label: 'Sakit',  color: '#60a5fa', bg: 'rgba(59,130,246,0.12)',  border: 'rgba(59,130,246,0.25)',  icon: AlertCircle },
     izin:  { label: 'Izin',   color: '#fbbf24', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.25)',  icon: Clock },
-    alpha: { label: 'Alpha',  color: '#f87171', bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.25)',   icon: XCircle },
+    alpha: { label: 'Alpha',  color: '#f87171', bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.25)',   icon: XCircle }
 };
 
 const TODAY = new Date().toISOString().split('T')[0];
@@ -40,7 +41,7 @@ export default function Attendance() {
             setSummary(res.data.summary || {});
             setDirty(false);
         } catch (err) {
-            Swal.fire({ title: 'Error', text: 'Gagal memuat data absensi', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Error', text: 'Gagal memuat data absensi', icon: 'error' });
         } finally {
             setLoading(false);
         }
@@ -54,7 +55,7 @@ export default function Attendance() {
             const res = await api.get(`/attendances/summary?month=${rekapMonth}&year=${rekapYear}`);
             setRekapData(res.data.data || []);
         } catch {
-            Swal.fire({ title: 'Error', text: 'Gagal memuat rekap', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Error', text: 'Gagal memuat rekap', icon: 'error' });
         }
     }, [rekapMonth, rekapYear]);
 
@@ -81,7 +82,7 @@ export default function Attendance() {
     const handleSave = async () => {
         const unset = rows.filter(r => !r.status);
         if (unset.length > 0) {
-            Swal.fire({ title: 'Belum lengkap', text: `${unset.length} siswa belum diisi statusnya`, icon: 'warning', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Belum lengkap', text: `${unset.length} siswa belum diisi statusnya`, icon: 'warning' });
             return;
         }
         setSaving(true);
@@ -91,13 +92,13 @@ export default function Attendance() {
                 attendances: rows.map(r => ({
                     student_id: r.student_id,
                     status: r.status,
-                    notes: r.notes || '',
-                })),
+                    notes: r.notes || ''
+                }))
             });
-            Swal.fire({ title: 'Sukses!', text: 'Absensi berhasil disimpan.', icon: 'success', background: '#0d1526', color: '#e2e8f0', timer: 1800, showConfirmButton: false });
+            swal({ title: 'Sukses!', text: 'Absensi berhasil disimpan.', icon: 'success', timer: 1800, showConfirmButton: false });
             fetchAttendance(date);
         } catch {
-            Swal.fire({ title: 'Error', text: 'Gagal menyimpan absensi', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Error', text: 'Gagal menyimpan absensi', icon: 'error' });
         } finally {
             setSaving(false);
         }
@@ -145,7 +146,7 @@ export default function Attendance() {
             columnStyles: {
                 0: { halign: 'center', cellWidth: 10 },
                 1: { cellWidth: 28 },
-                3: { halign: 'center', cellWidth: 22 },
+                3: { halign: 'center', cellWidth: 22 }
             },
             margin: { left: 12, right: 12 },
             styles: { cellPadding: 3 },
@@ -153,7 +154,7 @@ export default function Attendance() {
                 const pageCount = doc.internal.getNumberOfPages();
                 doc.setFontSize(7); doc.setTextColor(148, 163, 184);
                 doc.text(`Halaman ${data.pageNumber} dari ${pageCount}`, 105, doc.internal.pageSize.height - 5, { align: 'center' });
-            },
+            }
         });
 
         doc.save(`Absensi-${date}.pdf`);
@@ -189,7 +190,7 @@ export default function Attendance() {
                             style={{
                                 background: tab === t.id ? 'linear-gradient(135deg, #8b5cf6, #a78bfa)' : 'transparent',
                                 color: tab === t.id ? '#fff' : 'var(--text-secondary)',
-                                boxShadow: tab === t.id ? '0 2px 8px rgba(139,92,246,0.35)' : 'none',
+                                boxShadow: tab === t.id ? '0 2px 8px rgba(139,92,246,0.35)' : 'none'
                             }}>
                             <t.icon size={13} /> {t.label}
                         </button>
@@ -323,7 +324,7 @@ export default function Attendance() {
                                                                 background: row.status === key ? sc.bg : 'var(--bg-input)',
                                                                 color: row.status === key ? sc.color : 'var(--text-muted)',
                                                                 border: `1px solid ${row.status === key ? sc.border : 'var(--border-input)'}`,
-                                                                transform: row.status === key ? 'scale(1.02)' : 'scale(1)',
+                                                                transform: row.status === key ? 'scale(1.02)' : 'scale(1)'
                                                             }}
                                                         >
                                                             {sc.label}
@@ -341,7 +342,7 @@ export default function Attendance() {
                                                         style={{
                                                             background: 'var(--bg-input)',
                                                             border: '1px solid var(--border-input)',
-                                                            color: 'var(--text-input)',
+                                                            color: 'var(--text-input)'
                                                         }}
                                                         onFocus={e => {
                                                             e.target.style.borderColor = 'rgba(139,92,246,0.5)';
@@ -418,10 +419,10 @@ export default function Attendance() {
                                 columnStyles: {
                                     0: { halign: 'center', cellWidth: 10 },
                                     3: { halign: 'center' }, 4: { halign: 'center' },
-                                    5: { halign: 'center' }, 6: { halign: 'center' }, 7: { halign: 'center' },
+                                    5: { halign: 'center' }, 6: { halign: 'center' }, 7: { halign: 'center' }
                                 },
                                 margin: { left: 10, right: 10 },
-                                styles: { cellPadding: 3 },
+                                styles: { cellPadding: 3 }
                             });
 
                             doc.save(`Rekap-Absensi-${months[rekapMonth - 1]}-${rekapYear}.pdf`);

@@ -34,7 +34,7 @@ export default function TabMapel() {
 
     const handleDelete = (id) => swal({
         title:'Hapus mata pelajaran?', icon:'warning', showCancelButton:true,
-        confirmButtonColor:'#ef4444', cancelButtonColor:'#374151',
+        confirmButtonColor:'#ef4444',
         confirmButtonText:'Ya, Hapus!', cancelButtonText:'Batal',
     }).then(async r => { if (r.isConfirmed) { await api.delete(`/subjects/${id}`); fetch(); } });
 

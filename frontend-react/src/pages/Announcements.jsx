@@ -10,19 +10,20 @@ import Swal from 'sweetalert2';
 import { useForm } from 'react-hook-form';
 import ModernSelect from '../components/ModernSelect';
 import ModernDatepicker from '../components/ModernDatepicker';
+import { swal } from '../utils/swal';
 
 /* ── Config ── */
 const CATEGORY_CFG = {
     umum:      { label: 'Umum',     color: '#60a5fa', bg: 'rgba(59,130,246,0.12)',  border: 'rgba(59,130,246,0.25)',  icon: Info },
     akademik:  { label: 'Akademik', color: '#a78bfa', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.25)', icon: BookOpen },
     kegiatan:  { label: 'Kegiatan', color: '#34d399', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.25)', icon: CalendarDays },
-    darurat:   { label: 'Darurat',  color: '#f87171', bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.25)',  icon: AlertTriangle },
+    darurat:   { label: 'Darurat',  color: '#f87171', bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.25)',  icon: AlertTriangle }
 };
 
 const PRIORITY_CFG = {
     normal:  { label: 'Normal',  color: '#94a3b8', bg: 'rgba(148,163,184,0.10)', border: 'rgba(148,163,184,0.20)' },
     penting: { label: 'Penting', color: '#fbbf24', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.25)'  },
-    urgent:  { label: 'Urgent',  color: '#f87171', bg: 'rgba(239,68,68,0.15)',   border: 'rgba(239,68,68,0.30)'   },
+    urgent:  { label: 'Urgent',  color: '#f87171', bg: 'rgba(239,68,68,0.15)',   border: 'rgba(239,68,68,0.30)'   }
 };
 
 const labelClass = 'block text-xs font-semibold uppercase tracking-wider mb-1.5';
@@ -66,7 +67,7 @@ export default function Announcements() {
             setItems(filtered);
             setTotal(res.data.total || data.length);
         } catch {
-            Swal.fire({ title: 'Error', text: 'Gagal memuat pengumuman', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Error', text: 'Gagal memuat pengumuman', icon: 'error' });
         } finally {
             setLoading(false);
         }
@@ -88,7 +89,7 @@ export default function Announcements() {
             category: item.category,
             priority: item.priority,
             is_published: item.is_published,
-            expires_at: item.expires_at ? item.expires_at.split('T')[0] : '',
+            expires_at: item.expires_at ? item.expires_at.split('T')[0] : ''
         });
         setEditingId(item.id);
         setIsModalOpen(true);
@@ -100,35 +101,32 @@ export default function Announcements() {
             const payload = { ...data, is_published: data.is_published === true || data.is_published === 'true' };
             if (editingId) {
                 await api.put(`/announcements/${editingId}`, payload);
-                Swal.fire({ title: 'Sukses!', text: 'Pengumuman diperbarui.', icon: 'success', background: '#0d1526', color: '#e2e8f0', timer: 1500, showConfirmButton: false });
+                swal({ title: 'Sukses!', text: 'Pengumuman diperbarui.', icon: 'success', timer: 1500, showConfirmButton: false });
             } else {
                 await api.post('/announcements', payload);
-                Swal.fire({ title: 'Sukses!', text: 'Pengumuman berhasil dibuat.', icon: 'success', background: '#0d1526', color: '#e2e8f0', timer: 1500, showConfirmButton: false });
+                swal({ title: 'Sukses!', text: 'Pengumuman berhasil dibuat.', icon: 'success', timer: 1500, showConfirmButton: false });
             }
             setIsModalOpen(false);
             fetchAnnouncements();
         } catch (err) {
-            Swal.fire({ title: 'Error', text: err.response?.data?.message || 'Terjadi kesalahan', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Error', text: err.response?.data?.message || 'Terjadi kesalahan', icon: 'error' });
         }
     };
 
     /* ── Delete ── */
     const handleDelete = (id) => {
-        Swal.fire({
+        swal({
             title: 'Hapus pengumuman?',
             text: 'Data tidak bisa dikembalikan!',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#374151',
             confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal',
-            background: '#0d1526',
-            color: '#e2e8f0',
+            cancelButtonText: 'Batal'
         }).then(async (result) => {
             if (result.isConfirmed) {
                 await api.delete(`/announcements/${id}`);
-                Swal.fire({ title: 'Terhapus!', text: 'Pengumuman telah dihapus.', icon: 'success', background: '#0d1526', color: '#e2e8f0', timer: 1200, showConfirmButton: false });
+                swal({ title: 'Terhapus!', text: 'Pengumuman telah dihapus.', icon: 'success', timer: 1200, showConfirmButton: false });
                 fetchAnnouncements();
             }
         });
@@ -210,7 +208,7 @@ export default function Announcements() {
                             style={{
                                 background: filterCat === key ? cfg.bg : 'var(--bg-card)',
                                 border: `1px solid ${filterCat === key ? cfg.border : 'var(--border-card)'}`,
-                                boxShadow: 'var(--shadow-card)',
+                                boxShadow: 'var(--shadow-card)'
                             }}>
                             <div className="flex items-center justify-between mb-1">
                                 <p className="text-xs font-medium" style={{ color: 'var(--text-label)' }}>{cfg.label}</p>
@@ -255,7 +253,7 @@ export default function Announcements() {
                                     background: 'var(--bg-card)',
                                     border: '1px solid var(--border-card)',
                                     boxShadow: 'var(--shadow-card)',
-                                    borderLeft: `3px solid ${cat.color}`,
+                                    borderLeft: `3px solid ${cat.color}`
                                 }}
                             >
                                 {/* Card Header */}
@@ -313,7 +311,7 @@ export default function Announcements() {
                                                     WebkitLineClamp: isExpanded ? 'unset' : 2,
                                                     WebkitBoxOrient: 'vertical',
                                                     overflow: isExpanded ? 'visible' : 'hidden',
-                                                    whiteSpace: 'pre-wrap',
+                                                    whiteSpace: 'pre-wrap'
                                                 }}>
                                                 {item.content}
                                             </p>
