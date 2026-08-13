@@ -22,4 +22,68 @@ class ClassroomController extends Controller {
         Classroom::destroy($id);
         return response()->json(['message'=>'Kelas dihapus']);
     }
+
+    /**
+     * Membuat banyak kelas sekaligus dari kombinasi tingkat x rombel.
+     *
+     * Membuat kelas satu per satu lewat modal jadi penghalang nyata: satu SD
+     * butuh belasan kelas (1A sampai 6B), dan selama kelasnya belum ada, siswa
+     * tidak bisa ditempatkan sehingga absensi dan nilai ikut tertahan.
+     *
+     * Idempoten — nama yang sudah ada dilewati, bukan digandakan atau ditolak,
+     * supaya aman dijalankan ulang untuk menambah rombel baru.
+     */
+    public function generate(Request $request) {
+        $v = $request->validate([
+            'grade_levels'   => 'required|array|min:1|max:20',
+            'grade_levels.*' => 'required|string|max:10',
+            'rombel'         => 'required|array|min:1|max:12',
+            'rombel.*'       => 'required|string|max:5',
+            'major'          => 'nullable|string|max:50',
+            'capacity'       => 'nullable|integer|min:1|max:100',
+        ]);
+
+        $existing = Classroom::pluck('name')
+            ->mapWithKeys(fn ($n) => [mb_strtolower(trim($n)) => true])
+            ->all();
+
+        $dibuat = [];
+        $dilewati = [];
+
+        foreach ($v['grade_levels'] as $level) {
+            foreach ($v['rombel'] as $rombel) {
+                $level  = trim($level);
+                $rombel = trim($rombel);
+                $name   = $level . $rombel;
+
+                if (isset($existing[mb_strtolower($name)])) {
+                    $dilewati[] = $name;
+                    continue;
+                }
+
+                Classroom::create([
+                    'name'        => $name,
+                    'grade_level' => $level,
+                    'major'       => $v['major'] ?? null,
+                    'capacity'    => $v['capacity'] ?? 30,
+                ]);
+
+                // Cegah duplikat dalam satu permintaan, mis. rombel dikirim ganda
+                $existing[mb_strtolower($name)] = true;
+                $dibuat[] = $name;
+            }
+        }
+
+        $pesan = count($dibuat) . ' kelas dibuat';
+        if ($dilewati) {
+            $pesan .= ', ' . count($dilewati) . ' dilewati karena sudah ada (' . implode(', ', $dilewati) . ')';
+        }
+
+        return response()->json([
+            'message'  => $pesan . '.',
+            'created'  => $dibuat,
+            'skipped'  => $dilewati,
+            'data'     => Classroom::with('homeroomTeacher')->orderBy('grade_level')->orderBy('name')->get(),
+        ], 201);
+    }
 }

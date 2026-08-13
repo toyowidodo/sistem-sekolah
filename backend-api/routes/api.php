@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard Stats
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+    Route::get('/dashboard/setup-progress', [DashboardController::class, 'setupProgress']);
 
     // Profil
     Route::get('profile', [ProfileController::class, 'show']);
@@ -115,6 +116,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('promotions/preview', [\App\Http\Controllers\Api\PromotionController::class, 'preview']);
         Route::post('promotions/execute', [\App\Http\Controllers\Api\PromotionController::class, 'execute']);
 
+        // Harus sebelum apiResource, kalau tidak "generate" akan tertangkap
+        // sebagai parameter {classroom} pada rute update/destroy
+        Route::post('classrooms/generate', [ClassroomController::class, 'generate']);
         Route::apiResource('classrooms', ClassroomController::class)->except(['show', 'index']);
         Route::apiResource('subjects', SubjectController::class)->except(['show']);
         Route::apiResource('schedules', ScheduleController::class)->except(['show']);

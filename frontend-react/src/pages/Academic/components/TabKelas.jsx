@@ -1,13 +1,9 @@
-﻿import { useEffect, useState, useCallback } from 'react';
+﻿import { useEffect, useState } from 'react';
 import api from '../../../api/axios';
 import Modal from '../../../components/Modal';
-import {
-    BookOpen, PlusCircle, Edit, Trash2, GraduationCap,
-    Calendar, Users, Clock, ChevronDown, School, Hash,
-    MapPin, BookMarked
-} from 'lucide-react';
+import { PlusCircle, Edit, Trash2, GraduationCap, Users, School, Hash } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { swal, labelClass, labelStyle, DAYS, DAY_COLOR, GRADE_COLOR, ActionBtn } from './Shared';
+import { swal, labelClass, labelStyle, GRADE_COLOR, ActionBtn } from './Shared';
 import ModernSelect from '../../../components/ModernSelect';
 
 export default function TabKelas({ teachers }) {
@@ -22,8 +18,49 @@ export default function TabKelas({ teachers }) {
     };
     useEffect(() => { fetch(); }, []);
 
-    const openCreate = () => { reset({ name:'', grade_level:'X', major:'', homeroom_teacher_id:'', capacity:30 }); setEditId(null); setIsOpen(true); };
+    // Default tingkat mengikuti data yang sudah ada, bukan 'X' — sekolah ini
+    // belum tentu SMA
+    const openCreate = () => {
+        reset({ name:'', grade_level: classrooms[0]?.grade_level || '1', major:'', homeroom_teacher_id:'', capacity:30 });
+        setEditId(null); setIsOpen(true);
+    };
     const openEdit   = (c) => { reset(c); setEditId(c.id); setIsOpen(true); };
+
+    /* ── Generate kelas massal ── */
+    const [genOpen, setGenOpen]   = useState(false);
+    const [jenjang, setJenjang]   = useState('SD');
+    const [rombelCount, setRombel] = useState(2);
+    const [kapasitas, setKapasitas] = useState(30);
+    const [generating, setGenerating] = useState(false);
+
+    const JENJANG = {
+        SD:  ['1', '2', '3', '4', '5', '6'],
+        SMP: ['VII', 'VIII', 'IX'],
+        SMA: ['X', 'XI', 'XII'],
+    };
+
+    const hurufRombel = (n) => Array.from({ length: n }, (_, i) => String.fromCharCode(65 + i));
+    const previewKelas = JENJANG[jenjang].flatMap(t => hurufRombel(rombelCount).map(r => t + r));
+    const sudahAda = new Set(classrooms.map(c => c.name.toLowerCase()));
+    const bakalBaru = previewKelas.filter(n => !sudahAda.has(n.toLowerCase()));
+
+    const handleGenerate = async () => {
+        setGenerating(true);
+        try {
+            const r = await api.post('/classrooms/generate', {
+                grade_levels: JENJANG[jenjang],
+                rombel: hurufRombel(rombelCount),
+                capacity: Number(kapasitas) || 30,
+            });
+            swal({ title: 'Selesai', text: r.data.message, icon: 'success' });
+            setGenOpen(false);
+            fetch();
+        } catch (e) {
+            swal({ title: 'Gagal', text: e.response?.data?.message || 'Terjadi kesalahan', icon: 'error' });
+        } finally {
+            setGenerating(false);
+        }
+    };
 
     const onSubmit = async (data) => {
         try {
@@ -39,14 +76,39 @@ export default function TabKelas({ teachers }) {
         confirmButtonText:'Ya, Hapus!', cancelButtonText:'Batal',
     }).then(async r => { if (r.isConfirmed) { await api.delete(`/classrooms/${id}`); fetch(); } });
 
-    const byGrade = DAYS.reduce((acc, _) => acc, {});
-    const grades = ['X','XI','XII'];
+    /**
+     * Tingkat diambil dari data, bukan didaftar tetap.
+     *
+     * Sebelumnya nilainya di-hardcode ['X','XI','XII'], sehingga kelas di luar
+     * jenjang SMA — misalnya "1A" di SD — tidak pernah dirender. Lebih buruk
+     * lagi, empty state hanya muncul kalau classrooms.length === 0, jadi
+     * halamannya tampak kosong melompong padahal datanya ada.
+     *
+     * Urutannya: tingkat angka (1..6) menaik lebih dulu, lalu sisanya
+     * mengikuti urutan jenjang yang lazim, baru abjad.
+     */
+    const ROMAWI = ['VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+    const grades = [...new Set(classrooms.map(c => c.grade_level).filter(Boolean))]
+        .sort((a, b) => {
+            const na = Number(a), nb = Number(b);
+            if (!isNaN(na) && !isNaN(nb)) return na - nb;
+            if (!isNaN(na)) return -1;
+            if (!isNaN(nb)) return 1;
+            const ia = ROMAWI.indexOf(a), ib = ROMAWI.indexOf(b);
+            if (ia !== -1 && ib !== -1) return ia - ib;
+            if (ia !== -1) return -1;
+            if (ib !== -1) return 1;
+            return a.localeCompare(b);
+        });
 
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{classrooms.length} kelas terdaftar</p>
-                <button onClick={openCreate} className="btn-primary"><PlusCircle size={13}/> Tambah Kelas</button>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => setGenOpen(true)} className="btn-ghost"><Hash size={13}/> Generate Kelas</button>
+                    <button onClick={openCreate} className="btn-primary"><PlusCircle size={13}/> Tambah Kelas</button>
+                </div>
             </div>
 
             {/* Group by grade */}
@@ -101,9 +163,91 @@ export default function TabKelas({ teachers }) {
                     style={{ background:'var(--bg-card)', border:'1px solid var(--border-card)' }}>
                     <School size={32} style={{ color:'var(--text-muted)', marginBottom:8 }}/>
                     <p className="font-semibold text-sm" style={{ color:'var(--text-secondary)' }}>Belum ada kelas</p>
-                    <button onClick={openCreate} className="btn-primary mt-3"><PlusCircle size={12}/> Tambah Kelas</button>
+                    <p className="text-xs mt-1 max-w-sm text-center" style={{ color:'var(--text-muted)' }}>
+                        Kelas harus dibuat lebih dulu — siswa tidak bisa ditempatkan, dan absensi
+                        maupun nilai belum bisa dimulai tanpa ini.
+                    </p>
+                    <div className="flex items-center gap-2 mt-3">
+                        <button onClick={() => setGenOpen(true)} className="btn-primary"><Hash size={12}/> Generate Sekaligus</button>
+                        <button onClick={openCreate} className="btn-ghost"><PlusCircle size={12}/> Tambah Satu</button>
+                    </div>
                 </div>
             )}
+
+            {/* Modal generate kelas massal */}
+            <Modal isOpen={genOpen} onClose={() => setGenOpen(false)} title="Generate Kelas Sekaligus">
+                <div className="space-y-4">
+                    <div>
+                        <label className={labelClass} style={labelStyle}>Jenjang</label>
+                        <div className="flex gap-2">
+                            {Object.keys(JENJANG).map(j => (
+                                <button key={j} type="button" onClick={() => setJenjang(j)}
+                                    className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+                                    style={jenjang === j
+                                        ? { background:'linear-gradient(135deg,#6366f1,#06b6d4)', color:'#fff' }
+                                        : { background:'var(--bg-input)', color:'var(--text-secondary)', border:'1px solid var(--border-input)' }}>
+                                    {j}
+                                </button>
+                            ))}
+                        </div>
+                        <p className="text-xs mt-1.5" style={{ color:'var(--text-muted)' }}>
+                            Tingkat: {JENJANG[jenjang].join(', ')}
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass} style={labelStyle}>Rombel per tingkat</label>
+                            <ModernSelect value={rombelCount} onChange={e => setRombel(Number(e.target.value))} className="input-dark w-full">
+                                {[1,2,3,4,5,6].map(n => (
+                                    <option key={n} value={n}>{n} ({hurufRombel(n).join(', ')})</option>
+                                ))}
+                            </ModernSelect>
+                        </div>
+                        <div>
+                            <label className={labelClass} style={labelStyle}>Kapasitas per kelas</label>
+                            <input type="number" min="1" max="100" value={kapasitas}
+                                onChange={e => setKapasitas(e.target.value)} className="input-dark w-full"/>
+                        </div>
+                    </div>
+
+                    <div className="rounded-xl p-3" style={{ background:'var(--bg-input)', border:'1px solid var(--border-input)' }}>
+                        <p className="text-xs font-semibold mb-2" style={{ color:'var(--text-label)' }}>
+                            Pratinjau — {previewKelas.length} kelas, {bakalBaru.length} akan dibuat
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                            {previewKelas.map(n => {
+                                const ada = sudahAda.has(n.toLowerCase());
+                                return (
+                                    <span key={n} className="px-2 py-0.5 rounded text-xs font-mono"
+                                        style={ada
+                                            ? { background:'rgba(100,116,139,0.15)', color:'var(--text-muted)', textDecoration:'line-through' }
+                                            : { background:'rgba(99,102,241,0.12)', color:'#818cf8' }}>
+                                        {n}
+                                    </span>
+                                );
+                            })}
+                        </div>
+                        {previewKelas.length !== bakalBaru.length && (
+                            <p className="text-xs mt-2" style={{ color:'var(--text-muted)' }}>
+                                Yang dicoret sudah ada dan akan dilewati, bukan digandakan.
+                            </p>
+                        )}
+                    </div>
+
+                    <p className="text-xs" style={{ color:'var(--text-muted)' }}>
+                        Wali kelas dan jurusan bisa diisi belakangan lewat tombol Edit di tiap kelas.
+                    </p>
+
+                    <div className="flex justify-end gap-2 pt-3" style={{ borderTop:'1px solid var(--border)' }}>
+                        <button type="button" onClick={() => setGenOpen(false)} className="btn-ghost">Batal</button>
+                        <button type="button" onClick={handleGenerate} disabled={generating || bakalBaru.length === 0}
+                            className="btn-primary" style={{ opacity: (generating || bakalBaru.length === 0) ? 0.5 : 1 }}>
+                            {generating ? 'Membuat...' : `Buat ${bakalBaru.length} Kelas`}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
 
             <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title={editId ? 'Edit Kelas' : 'Tambah Kelas Baru'}>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
