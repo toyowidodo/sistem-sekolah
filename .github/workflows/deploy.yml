@@ -80,10 +80,29 @@ jobs:
       - name: Siapkan kunci SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+
+          # Kunci yang disalin lewat terminal Windows hampir selalu membawa
+          # akhiran baris CRLF. OpenSSH menolaknya dengan pesan yang sama sekali
+          # tidak membantu:
+          #
+          #   Load key "deploy_key": error in libcrypto
+          #   Permission denied (publickey,password)
+          #
+          # tr membuang CR; printf menjamin ada baris baru di akhir berkas,
+          # yang juga diwajibkan OpenSSH.
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+
+          # Gagal di sini dengan pesan yang jelas, bukan menunggu "Permission
+          # denied" yang menyesatkan di langkah berikutnya
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null 2>&1; then
+            echo "::error::Secret SSH_PRIVATE_KEY bukan kunci privat yang sah. Pastikan SELURUH isi tersalin, termasuk baris -----BEGIN OPENSSH PRIVATE KEY----- dan -----END OPENSSH PRIVATE KEY-----."
+            exit 1
+          fi
+          echo "Kunci privat terbaca sah."
+
           # Host key diverifikasi, bukan diabaikan — mencegah man-in-the-middle
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          printf '%s\n' "${{ secrets.SSH_KNOWN_HOSTS }}" | tr -d '\r' > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
       - name: Uji koneksi
