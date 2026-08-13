@@ -3,10 +3,9 @@ import {
     Calendar, Users, Clock, ChevronDown, School, Hash,
     MapPin, BookMarked
 } from 'lucide-react';
-import Swal from 'sweetalert2';
 
 
-export const swal = (opts) => Swal.fire({ background: '#0d1526', color: '#e2e8f0', ...opts });
+export { swal } from '../../../utils/swal';
 export const labelClass = 'block text-xs font-semibold uppercase tracking-wider mb-1.5';
 export const labelStyle = { color: 'var(--text-label)' };
 
@@ -17,13 +16,13 @@ export const DAY_COLOR = {
     Rabu:   { color: '#60a5fa', bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.25)' },
     Kamis:  { color: '#fbbf24', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.25)' },
     Jumat:  { color: '#f87171', bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.25)'  },
-    Sabtu:  { color: '#a78bfa', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.25)' },
+    Sabtu:  { color: '#a78bfa', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.25)' }
 };
 
 export const GRADE_COLOR = {
     X:   'linear-gradient(135deg, #6366f1, #818cf8)',
     XI:  'linear-gradient(135deg, #06b6d4, #67e8f9)',
-    XII: 'linear-gradient(135deg, #10b981, #34d399)',
+    XII: 'linear-gradient(135deg, #10b981, #34d399)'
 };
 
 /* ── Action Button ── */

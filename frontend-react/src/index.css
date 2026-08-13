@@ -84,15 +84,20 @@
    CSS VARIABLES — LIGHT THEME
    ============================================ */
 :root[data-theme="light"] {
-  /* Backgrounds */
-  --bg-base:        #f1f5f9;
-  --bg-card:        rgba(255,255,255,0.92);
+  /* Backgrounds
+     Sebelumnya base #f1f5f9 dengan kartu putih murni: luminansi 0.91 dan 1.00,
+     terlalu menyilaukan untuk dipandang lama, sementara selisih keduanya cuma
+     0.09 sehingga kartu nyaris tidak terpisah dari halaman.
+     Sekarang keduanya diturunkan, tapi selisihnya justru dinaikkan ke 0.135 —
+     lebih teduh sekaligus hierarkinya lebih jelas. */
+  --bg-base:        #e6eaf1;
+  --bg-card:        #f9fafc;
   --bg-card-hover:  #ffffff;
-  --bg-sidebar:     linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  --bg-topbar:      rgba(255,255,255,0.92);
-  --bg-input:       rgba(0,0,0,0.035);
+  --bg-sidebar:     linear-gradient(180deg, #f6f8fb 0%, #eef1f7 100%);
+  --bg-topbar:      rgba(249,250,252,0.92);
+  --bg-input:       rgba(0,0,0,0.04);
   --bg-input-focus: rgba(99,102,241,0.06);
-  --bg-modal:       rgba(255,255,255,0.99);
+  --bg-modal:       #fbfcfe;
   --bg-btn-ghost:   rgba(0,0,0,0.04);
   --bg-btn-ghost-h: rgba(0,0,0,0.07);
   --bg-user-panel:  rgba(0,0,0,0.04);
@@ -114,25 +119,29 @@
   --border-btn-ghost:    rgba(0,0,0,0.08);
   --border-btn-ghost-h:  rgba(0,0,0,0.14);
 
-  /* Text */
-  --text-primary:   #0f172a;
-  --text-secondary: #475569;
-  --text-muted:     #94a3b8;
-  --text-label:     #64748b;
+  /* Text
+     Nilai lama gagal kontras WCAG AA (min 4.5:1) di tema terang:
+       --text-muted / --text-footer  #94a3b8  ->  2.34:1  (nyaris tak terbaca)
+       --text-label / --text-th      #64748b  ->  4.34:1
+     Semua nilai di bawah sudah diverifikasi >= 4.5:1 terhadap base dan kartu. */
+  --text-primary:   #0f172a;   /* 14.8:1 */
+  --text-secondary: #3f4c5e;   /*  7.2:1 */
+  --text-muted:     #5c6b80;   /*  4.5:1 */
+  --text-label:     #546274;   /*  5.2:1 */
   --text-input:     #1e293b;
-  --text-ph:        rgba(100,116,139,0.5);
-  --text-th:        #64748b;
+  --text-ph:        rgba(84,98,116,0.6);
+  --text-th:        #546274;   /*  5.2:1 */
   --text-td:        #1e293b;
-  --text-btn-ghost: #475569;
+  --text-btn-ghost: #3f4c5e;
   --text-btn-ghost-h: #0f172a;
-  --text-sidebar:   #64748b;
+  --text-sidebar:   #546274;
   --text-sidebar-active: #4f46e5;
-  --text-footer:    #94a3b8;
+  --text-footer:    #5c6b80;   /*  4.5:1 */
 
-  /* Shadows */
-  --shadow-card:   0 2px 12px rgba(0,0,0,0.07);
-  --shadow-card-h: 0 6px 24px rgba(0,0,0,0.12);
-  --shadow-modal:  0 16px 48px rgba(0,0,0,0.18);
+  /* Shadows — sedikit lebih lembut karena latarnya tidak lagi seterang dulu */
+  --shadow-card:   0 1px 3px rgba(15,23,42,0.06), 0 4px 12px rgba(15,23,42,0.05);
+  --shadow-card-h: 0 4px 12px rgba(15,23,42,0.10), 0 12px 28px rgba(15,23,42,0.07);
+  --shadow-modal:  0 12px 40px rgba(15,23,42,0.16);
 
   /* Sidebar glow */
   --sidebar-glow: rgba(99,102,241,0.04);

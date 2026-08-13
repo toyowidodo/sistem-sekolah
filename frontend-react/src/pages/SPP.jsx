@@ -9,7 +9,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import ModernSelect from '../components/ModernSelect';
 
-const swal = (opts) => Swal.fire({ background: '#0d1526', color: '#e2e8f0', ...opts });
+const swal = (opts) => swal({ ...opts });
 
 const MONTHS = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -27,7 +27,7 @@ const StatusBadge = ({ status }) => {
             style={{
                 background: lunas ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
                 color: lunas ? '#34d399' : '#f87171',
-                border: `1px solid ${lunas ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'}`,
+                border: `1px solid ${lunas ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'}`
             }}>
             {lunas ? <CheckCircle size={10} /> : <XCircle size={10} />}
             {lunas ? 'Lunas' : 'Belum Lunas'}
@@ -70,8 +70,8 @@ function TabTagihan() {
             html: `Buat tagihan SPP untuk <b>${MONTHS[month]} ${year}</b>?<br/>
                    <small class="opacity-60">Siswa yang sudah punya tagihan bulan ini akan dilewati.</small>`,
             icon: 'question', showCancelButton: true,
-            confirmButtonColor: '#6366f1', cancelButtonColor: '#374151',
-            confirmButtonText: 'Ya, Generate!', cancelButtonText: 'Batal',
+            confirmButtonColor: '#6366f1',
+            confirmButtonText: 'Ya, Generate!', cancelButtonText: 'Batal'
         });
         if (!res.isConfirmed) return;
 
@@ -92,8 +92,8 @@ function TabTagihan() {
             input: 'text', inputLabel: 'Diterima oleh',
             inputPlaceholder: 'Nama petugas penerima...',
             showCancelButton: true,
-            confirmButtonColor: '#34d399', cancelButtonColor: '#374151',
-            confirmButtonText: 'Konfirmasi Lunas', cancelButtonText: 'Batal',
+            confirmButtonColor: '#34d399',
+            confirmButtonText: 'Konfirmasi Lunas', cancelButtonText: 'Batal'
         });
         if (!res.isConfirmed) return;
 
@@ -111,8 +111,8 @@ function TabTagihan() {
             title: 'Batalkan Pelunasan?',
             text: `Status ${bill.student_name} akan kembali ke "Belum Lunas"`,
             icon: 'warning', showCancelButton: true,
-            confirmButtonColor: '#ef4444', cancelButtonColor: '#374151',
-            confirmButtonText: 'Ya, Batalkan', cancelButtonText: 'Batal',
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Ya, Batalkan', cancelButtonText: 'Batal'
         });
         if (!res.isConfirmed) return;
         try {
@@ -150,9 +150,9 @@ function TabTagihan() {
             alternateRowStyles: { fillColor: [245, 243, 255] },
             columnStyles: {
                 0: { halign: 'center', cellWidth: 8 },
-                4: { halign: 'right' }, 5: { halign: 'center' }, 6: { halign: 'center' },
+                4: { halign: 'right' }, 5: { halign: 'center' }, 6: { halign: 'center' }
             },
-            margin: { left: 10, right: 10 },
+            margin: { left: 10, right: 10 }
         });
 
         doc.save(`SPP-${MONTHS[month]}-${year}.pdf`);
@@ -353,7 +353,7 @@ function TabSettings() {
                             <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
                                 style={{
                                     background: i === 0 ? 'rgba(99,102,241,0.15)' : i === 1 ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
-                                    color: i === 0 ? '#818cf8' : i === 1 ? '#34d399' : '#fbbf24',
+                                    color: i === 0 ? '#818cf8' : i === 1 ? '#34d399' : '#fbbf24'
                                 }}>
                                 {s.grade_level}
                             </div>
@@ -503,7 +503,7 @@ export default function SPP() {
                         style={{
                             background: tab === t.id ? 'linear-gradient(135deg,#10b981,#34d399)' : 'transparent',
                             color: tab === t.id ? '#fff' : 'var(--text-secondary)',
-                            boxShadow: tab === t.id ? '0 2px 8px rgba(16,185,129,0.35)' : 'none',
+                            boxShadow: tab === t.id ? '0 2px 8px rgba(16,185,129,0.35)' : 'none'
                         }}>
                         <t.icon size={13} /> {t.label}
                     </button>

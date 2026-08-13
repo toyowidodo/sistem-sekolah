@@ -35,7 +35,7 @@ export default function TabKelas({ teachers }) {
 
     const handleDelete = (id) => swal({
         title:'Hapus kelas?', text:'Data tidak bisa dikembalikan!', icon:'warning',
-        showCancelButton:true, confirmButtonColor:'#ef4444', cancelButtonColor:'#374151',
+        showCancelButton:true, confirmButtonColor:'#ef4444',
         confirmButtonText:'Ya, Hapus!', cancelButtonText:'Batal',
     }).then(async r => { if (r.isConfirmed) { await api.delete(`/classrooms/${id}`); fetch(); } });
 

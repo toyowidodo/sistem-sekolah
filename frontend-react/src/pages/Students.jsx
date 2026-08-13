@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import ModernSelect from '../components/ModernSelect';
 import GuardianModal from './GuardianModal';
 import EmptyState from '../components/EmptyState';
+import { swal } from '../utils/swal';
 
 const labelClass = "block text-xs font-semibold uppercase tracking-wider mb-1.5";
 const labelStyle = { color: 'var(--text-label)' };
@@ -43,7 +44,7 @@ export default function Students() {
             setStudents(res.data.data);
             setTotalStudents(res.data.meta?.total || res.data.data.length);
         } catch {
-            Swal.fire({ title: 'Error', text: 'Gagal memuat data', icon: 'error', background: 'var(--bg-modal)', color: 'var(--text-primary)' });
+            swal({ title: 'Error', text: 'Gagal memuat data', icon: 'error', background: 'var(--bg-modal)', color: 'var(--text-primary)' });
         }
     };
 
@@ -93,10 +94,10 @@ export default function Students() {
         try {
             if (editingId) {
                 await api.put(`/students/${editingId}`, payload);
-                Swal.fire({ title: 'Sukses!', text: 'Data siswa diperbarui.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+                swal({ title: 'Sukses!', text: 'Data siswa diperbarui.', icon: 'success' });
             } else {
                 await api.post('/students', payload);
-                Swal.fire({ title: 'Sukses!', text: 'Siswa baru ditambahkan.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+                swal({ title: 'Sukses!', text: 'Siswa baru ditambahkan.', icon: 'success' });
             }
             setIsModalOpen(false);
             fetchStudents();
@@ -107,26 +108,23 @@ export default function Students() {
                 ? Object.values(validationErrors).flat().join('\n')
                 : err.response?.data?.message || 'Terjadi kesalahan saat menyimpan data';
 
-            Swal.fire({ title: 'Gagal Menyimpan', text, icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Gagal Menyimpan', text, icon: 'error' });
         }
     };
 
     const handleDelete = async (id) => {
-        Swal.fire({
+        swal({
             title: 'Hapus data siswa?',
             text: 'Data yang dihapus tidak bisa dikembalikan!',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#374151',
             confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal',
-            background: '#0d1526',
-            color: '#e2e8f0',
+            cancelButtonText: 'Batal'
         }).then(async (result) => {
             if (result.isConfirmed) {
                 await api.delete(`/students/${id}`);
-                Swal.fire({ title: 'Terhapus!', text: 'Data siswa telah dihapus.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+                swal({ title: 'Terhapus!', text: 'Data siswa telah dihapus.', icon: 'success' });
                 fetchStudents();
             }
         });
@@ -143,7 +141,7 @@ export default function Students() {
             link.click();
             link.remove();
         } catch {
-            Swal.fire({ title: 'Error', text: 'Gagal export Excel', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Error', text: 'Gagal export Excel', icon: 'error' });
         }
     };
 
@@ -154,12 +152,10 @@ export default function Students() {
         const formData = new FormData();
         formData.append('file', file);
 
-        Swal.fire({
+        swal({
             title: 'Mengunggah...',
             text: 'Harap tunggu, sistem sedang memproses data siswa',
-            allowOutsideClick: false,
-            background: '#0d1526',
-            color: '#e2e8f0',
+            allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading();
             }
@@ -169,10 +165,10 @@ export default function Students() {
             await api.post('/students/import', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            Swal.fire({ title: 'Berhasil!', text: 'Data siswa berhasil diunggah', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Berhasil!', text: 'Data siswa berhasil diunggah', icon: 'success' });
             fetchStudents(); // Refresh data
         } catch (err) {
-            Swal.fire({ title: 'Gagal', text: err.response?.data?.message || 'Gagal mengunggah data', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Gagal', text: err.response?.data?.message || 'Gagal mengunggah data', icon: 'error' });
         }
         
         // Reset file input agar bisa upload file yang sama lagi jika perlu
@@ -190,7 +186,7 @@ export default function Students() {
             link.click();
             link.remove();
         } catch {
-            Swal.fire({ title: 'Error', text: 'Gagal mengunduh template', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Error', text: 'Gagal mengunduh template', icon: 'error' });
         }
     };
 
@@ -235,7 +231,7 @@ export default function Students() {
                     `Halaman ${data.pageNumber} dari ${pageCount}  •  Total: ${students.length} Siswa`,
                     148, doc.internal.pageSize.height - 5, { align: 'center' }
                 );
-            },
+            }
         });
 
         doc.save(`Data-Siswa-${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -270,17 +266,17 @@ export default function Students() {
         try {
             const res = await api.post('/students/bulk-classroom', {
                 student_ids: selectedIds,
-                classroom_id: bulkClassroom || null,
+                classroom_id: bulkClassroom || null
             });
-            Swal.fire({ title: 'Berhasil', text: res.data.message, icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Berhasil', text: res.data.message, icon: 'success' });
             setSelectedIds([]);
             setBulkClassroom('');
             fetchStudents();
         } catch (err) {
-            Swal.fire({
+            swal({
                 title: 'Gagal',
                 text: err.response?.data?.message || 'Gagal menetapkan kelas',
-                icon: 'error', background: '#0d1526', color: '#e2e8f0',
+                icon: 'error'
             });
         }
     };
@@ -295,7 +291,7 @@ export default function Students() {
             render: (row) => (
                 <input type="checkbox" checked={selectedIds.includes(row.id)}
                     onChange={() => toggleOne(row.id)} className="cursor-pointer" />
-            ),
+            )
         },
         { header: 'NISN', field: 'nisn' },
         { header: 'Nama Lengkap', field: 'name' },
@@ -307,7 +303,7 @@ export default function Students() {
                     fontSize: '11px', fontWeight: 600,
                     background: row.gender === 'L' ? 'rgba(59,130,246,0.15)' : 'rgba(236,72,153,0.15)',
                     color: row.gender === 'L' ? '#60a5fa' : '#f472b6',
-                    border: `1px solid ${row.gender === 'L' ? 'rgba(59,130,246,0.25)' : 'rgba(236,72,153,0.25)'}`,
+                    border: `1px solid ${row.gender === 'L' ? 'rgba(59,130,246,0.25)' : 'rgba(236,72,153,0.25)'}`
                 }}>
                     {row.gender === 'L' ? 'Laki-laki' : 'Perempuan'}
                 </span>
@@ -487,7 +483,7 @@ export default function Students() {
                                                     color: h.status === 'lulus' ? '#818cf8'
                                                         : h.status === 'naik' ? '#34d399'
                                                         : h.status === 'tinggal' ? '#fbbf24'
-                                                        : h.status === 'keluar' ? '#f87171' : '#94a3b8',
+                                                        : h.status === 'keluar' ? '#f87171' : '#94a3b8'
                                                 }}>
                                                 {h.status}
                                             </span>

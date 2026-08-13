@@ -5,10 +5,10 @@ import Modal from '../components/Modal';
 import { Edit, Trash2, PlusCircle, FileText, Wallet, CheckCircle, Clock } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import Swal from 'sweetalert2';
 import { useForm } from 'react-hook-form';
 import ModernSelect from '../components/ModernSelect';
 import ModernDatepicker from '../components/ModernDatepicker';
+import { swal } from '../utils/swal';
 
 const labelClass = "block text-xs font-semibold uppercase tracking-wider mb-1.5";
 const labelStyle = { color: 'var(--text-label)' };
@@ -26,7 +26,7 @@ export default function Payments() {
             const res = await api.get('/payments?per_page=1000');
             setPayments(res.data.data);
         } catch {
-            Swal.fire({ title: 'Error', text: 'Gagal memuat data keuangan', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Error', text: 'Gagal memuat data keuangan', icon: 'error' });
         }
     };
 
@@ -57,34 +57,31 @@ export default function Payments() {
         try {
             if (editingId) {
                 await api.put(`/payments/${editingId}`, data);
-                Swal.fire({ title: 'Sukses!', text: 'Data pembayaran diperbarui.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+                swal({ title: 'Sukses!', text: 'Data pembayaran diperbarui.', icon: 'success' });
             } else {
                 await api.post('/payments', data);
-                Swal.fire({ title: 'Sukses!', text: 'Pembayaran berhasil dicatat.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+                swal({ title: 'Sukses!', text: 'Pembayaran berhasil dicatat.', icon: 'success' });
             }
             setIsModalOpen(false);
             fetchPayments();
         } catch {
-            Swal.fire({ title: 'Error', text: 'Terjadi kesalahan', icon: 'error', background: '#0d1526', color: '#e2e8f0' });
+            swal({ title: 'Error', text: 'Terjadi kesalahan', icon: 'error' });
         }
     };
 
     const handleDelete = async (id) => {
-        Swal.fire({
+        swal({
             title: 'Hapus data pembayaran?',
             text: 'Data yang dihapus tidak bisa dikembalikan!',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#374151',
             confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal',
-            background: '#0d1526',
-            color: '#e2e8f0',
+            cancelButtonText: 'Batal'
         }).then(async (result) => {
             if (result.isConfirmed) {
                 await api.delete(`/payments/${id}`);
-                Swal.fire({ title: 'Terhapus!', text: 'Data pembayaran telah dihapus.', icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+                swal({ title: 'Terhapus!', text: 'Data pembayaran telah dihapus.', icon: 'success' });
                 fetchPayments();
             }
         });
@@ -130,7 +127,7 @@ export default function Payments() {
                 0: { halign: 'center', cellWidth: 10 },
                 3: { halign: 'right' },
                 4: { halign: 'center' },
-                5: { halign: 'center' },
+                5: { halign: 'center' }
             },
             margin: { left: 10, right: 10 },
             styles: { overflow: 'linebreak', cellPadding: 3 },
@@ -138,7 +135,7 @@ export default function Payments() {
                 const pageCount = doc.internal.getNumberOfPages();
                 doc.setFontSize(7); doc.setTextColor(148, 163, 184);
                 doc.text(`Halaman ${data.pageNumber} dari ${pageCount}  •  Total: ${payments.length} Transaksi`, 148, doc.internal.pageSize.height - 5, { align: 'center' });
-            },
+            }
         });
 
         doc.save(`Laporan-Keuangan-${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -178,10 +175,10 @@ export default function Payments() {
             styles: { fontSize: 9, cellPadding: { top: 3, bottom: 3, left: 4, right: 4 } },
             columnStyles: {
                 0: { fontStyle: 'bold', textColor: [71, 85, 105], cellWidth: 52 },
-                1: { textColor: [15, 23, 42] },
+                1: { textColor: [15, 23, 42] }
             },
             alternateRowStyles: { fillColor: [248, 250, 252] },
-            margin: { left: 10, right: 10 },
+            margin: { left: 10, right: 10 }
         });
 
         const finalY = doc.lastAutoTable.finalY + 14;

@@ -66,7 +66,7 @@ export default function Login() {
                 <div className="absolute inset-0 pointer-events-none"
                     style={{
                         backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
-                        backgroundSize: '28px 28px',
+                        backgroundSize: '28px 28px'
                     }} />
 
                 {/* Brand */}
@@ -149,7 +149,7 @@ export default function Login() {
                         border: '1px solid var(--border-modal)',
                         boxShadow: 'var(--shadow-modal)',
                         backdropFilter: 'blur(24px)',
-                        borderRadius: '24px',
+                        borderRadius: '24px'
                     }}
                 >
                     {/* Top shimmer */}
@@ -166,7 +166,7 @@ export default function Login() {
                             <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden"
                                 style={{
                                     background: 'linear-gradient(135deg, #6366f1, #06b6d4)',
-                                    boxShadow: '0 8px 24px rgba(99,102,241,0.4)',
+                                    boxShadow: '0 8px 24px rgba(99,102,241,0.4)'
                                 }}>
                                 {logoSrc ? (
                                     <img src={logoSrc} alt="Logo" className="w-full h-full object-cover" />
@@ -200,7 +200,7 @@ export default function Login() {
                                                 ? tab.key === 'admin'
                                                     ? '1px solid rgba(99,102,241,0.3)'
                                                     : '1px solid rgba(6,182,212,0.3)'
-                                                : '1px solid transparent',
+                                                : '1px solid transparent'
                                         }}
                                     >
                                         <Icon size={14} />
@@ -239,7 +239,7 @@ export default function Login() {
                                 style={{
                                     background: 'rgba(239,68,68,0.08)',
                                     border: '1px solid rgba(239,68,68,0.2)',
-                                    color: '#f87171',
+                                    color: '#f87171'
                                 }}>
                                 <span className="mt-0.5 flex-shrink-0">&#x26A0;&#xFE0F;</span>
                                 <span>{errorMsg}</span>
@@ -296,7 +296,7 @@ export default function Login() {
                                     className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl font-bold text-white text-sm transition-all duration-200"
                                     style={{
                                         background: isLoading ? 'rgba(99,102,241,0.5)' : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #06b6d4 100%)',
-                                        boxShadow: isLoading ? 'none' : '0 4px 20px rgba(99,102,241,0.4)',
+                                        boxShadow: isLoading ? 'none' : '0 4px 20px rgba(99,102,241,0.4)'
                                     }}
                                     onMouseEnter={e => { if (!isLoading) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(99,102,241,0.55)'; } }}
                                     onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(99,102,241,0.4)'; }}
@@ -314,7 +314,7 @@ export default function Login() {
                                     style={{
                                         background: 'rgba(6,182,212,0.08)',
                                         border: '1px solid rgba(6,182,212,0.2)',
-                                        color: '#67e8f9',
+                                        color: '#67e8f9'
                                     }}>
                                     <GraduationCap size={15} className="flex-shrink-0 mt-0.5" />
                                     <span>Gunakan email dan password yang diberikan oleh pihak sekolah untuk masuk ke portal siswa.</span>
@@ -367,7 +367,7 @@ export default function Login() {
                                     className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl font-bold text-white text-sm transition-all duration-200"
                                     style={{
                                         background: isLoading ? 'rgba(6,182,212,0.4)' : 'linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #10b981 100%)',
-                                        boxShadow: isLoading ? 'none' : '0 4px 20px rgba(6,182,212,0.4)',
+                                        boxShadow: isLoading ? 'none' : '0 4px 20px rgba(6,182,212,0.4)'
                                     }}
                                     onMouseEnter={e => { if (!isLoading) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(6,182,212,0.55)'; } }}
                                     onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(6,182,212,0.4)'; }}
