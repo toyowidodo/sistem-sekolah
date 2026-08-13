@@ -51,6 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('students/import/template', [StudentController::class, 'downloadTemplate']);
         Route::post('students/import', [StudentController::class, 'importExcel']);
         Route::get('students/export/excel', [StudentController::class, 'exportExcel']);
+        Route::post('students/bulk-classroom', [StudentController::class, 'bulkAssignClassroom']);
         Route::apiResource('students', StudentController::class);
     });
 

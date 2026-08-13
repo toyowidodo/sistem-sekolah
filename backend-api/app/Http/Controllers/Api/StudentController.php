@@ -75,10 +75,75 @@ class StudentController extends Controller
         ]);
 
         try {
-            Excel::import(new StudentsImport, $request->file('file'));
-            return response()->json(['message' => 'Data siswa berhasil diimport'], 200);
+            $import = new StudentsImport;
+            Excel::import($import, $request->file('file'));
+
+            $message = 'Data siswa berhasil diimport.';
+            if ($import->placed > 0) {
+                $message .= " {$import->placed} siswa langsung ditempatkan ke kelas.";
+            }
+            // Salah ketik nama kelas tidak menggagalkan impor, tapi harus
+            // diberitahukan — kalau tidak, siswanya diam-diam tidak berkelas
+            if (!empty($import->unknownClassrooms)) {
+                $message .= ' Nama kelas berikut tidak dikenali dan dilewati: '
+                    . implode(', ', array_values($import->unknownClassrooms))
+                    . '. Siswa tetap tersimpan tanpa kelas.';
+            }
+
+            return response()->json([
+                'message'            => $message,
+                'placed'             => $import->placed,
+                'unknown_classrooms' => array_values($import->unknownClassrooms),
+            ], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Gagal mengimport data: ' . $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Menempatkan banyak siswa ke satu kelas sekaligus.
+     *
+     * Tanpa ini, mengisi kelas untuk ratusan siswa harus lewat modal edit satu
+     * per satu — penghalang utama yang membuat data kelas tidak pernah terisi.
+     */
+    public function bulkAssignClassroom(Request $request)
+    {
+        $v = $request->validate([
+            'student_ids'   => 'required|array|min:1',
+            'student_ids.*' => 'integer|exists:students,id',
+            'classroom_id'  => 'nullable|exists:classrooms,id',
+        ]);
+
+        $year = \App\Models\AcademicYear::where('is_active', true)->value('name')
+            ?? \App\Models\Setting::where('key', 'active_academic_year')->value('value');
+
+        $affected = \Illuminate\Support\Facades\DB::transaction(function () use ($v, $year) {
+            Student::whereIn('id', $v['student_ids'])
+                ->update(['classroom_id' => $v['classroom_id'] ?? null]);
+
+            // Riwayat kelas per tahun ajaran ikut diperbarui supaya rapor dan
+            // rekap tahun berjalan tetap konsisten dengan penempatan baru
+            if ($year && !empty($v['classroom_id'])) {
+                foreach ($v['student_ids'] as $id) {
+                    \App\Models\StudentEnrollment::updateOrCreate(
+                        ['student_id' => $id, 'academic_year' => $year],
+                        ['classroom_id' => $v['classroom_id'], 'status' => 'aktif']
+                    );
+                }
+            }
+
+            return count($v['student_ids']);
+        });
+
+        $name = $v['classroom_id']
+            ? \App\Models\Classroom::whereKey($v['classroom_id'])->value('name')
+            : null;
+
+        return response()->json([
+            'message' => $name
+                ? "{$affected} siswa ditempatkan ke kelas {$name}."
+                : "{$affected} siswa dikeluarkan dari kelasnya.",
+            'affected' => $affected,
+        ]);
     }
 }
