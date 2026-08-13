@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { Users, GraduationCap, Wallet, TrendingUp, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
+import SetupProgress from '../components/SetupProgress';
 
 const fmt = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 
@@ -96,6 +97,9 @@ export default function Dashboard() {
                     {new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
             </div>
+
+            {/* Checklist kesiapan data — menghilang sendiri saat semua langkah selesai */}
+            <SetupProgress />
 
             {/* Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">

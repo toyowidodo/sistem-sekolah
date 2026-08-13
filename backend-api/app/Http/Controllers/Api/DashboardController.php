@@ -10,6 +10,87 @@ use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
 {
+    /**
+     * Ringkasan kesiapan data, untuk ditampilkan sebagai checklist di dashboard.
+     *
+     * Dashboard sebelumnya hanya menyajikan deretan angka nol tanpa memberi tahu
+     * apa yang kurang — terasa seperti aplikasi rusak, padahal datanya memang
+     * belum diisi. Urutan langkah di bawah mengikuti ketergantungan datanya:
+     * guru dibutuhkan jadwal, kelas dibutuhkan penempatan siswa, dan seterusnya.
+     */
+    public function setupProgress()
+    {
+        $year = \App\Models\Setting::where('key', 'active_academic_year')->value('value');
+
+        $siswaTotal    = \App\Models\Student::where('is_active', true)->count();
+        $siswaBerkelas = \App\Models\Student::where('is_active', true)->whereNotNull('classroom_id')->count();
+
+        $langkah = [
+            [
+                'key'   => 'guru',
+                'label' => 'Data Guru',
+                'hint'  => 'Dibutuhkan sebagai wali kelas dan pengampu jadwal',
+                'count' => Teacher::count(),
+                'path'  => '/teachers',
+            ],
+            [
+                'key'   => 'kelas',
+                'label' => 'Kelas',
+                'hint'  => 'Siswa baru bisa ditempatkan setelah kelas dibuat',
+                'count' => \App\Models\Classroom::count(),
+                'path'  => '/academic',
+            ],
+            [
+                'key'   => 'mapel',
+                'label' => 'Mata Pelajaran',
+                'hint'  => 'Dibutuhkan untuk menyusun jadwal dan input nilai',
+                'count' => \App\Models\Subject::count(),
+                'path'  => '/academic',
+            ],
+            [
+                'key'   => 'jadwal',
+                'label' => 'Jadwal Pelajaran',
+                'hint'  => 'Menentukan guru mengampu mapel apa di kelas mana',
+                'count' => \App\Models\Schedule::count(),
+                'path'  => '/academic',
+            ],
+            [
+                'key'    => 'penempatan',
+                'label'  => 'Siswa Ditempatkan',
+                'hint'   => 'Pakai tombol Tetapkan Kelas atau kolom Kelas saat impor',
+                'count'  => $siswaBerkelas,
+                'total'  => $siswaTotal,
+                'path'   => '/students',
+            ],
+            [
+                'key'   => 'spp',
+                'label' => 'Nominal SPP',
+                'hint'  => 'Tanpa ini, tagihan yang digenerate bernilai Rp 0',
+                'count' => \App\Models\SppSetting::when($year, fn ($q) => $q->where('academic_year', $year))->count(),
+                'path'  => '/spp',
+            ],
+        ];
+
+        // Langkah penempatan baru dianggap selesai kalau SELURUH siswa berkelas,
+        // bukan sekadar sudah ada satu yang ditempatkan
+        $langkah = array_map(function ($s) {
+            $s['done'] = isset($s['total'])
+                ? ($s['total'] > 0 && $s['count'] >= $s['total'])
+                : $s['count'] > 0;
+            return $s;
+        }, $langkah);
+
+        $selesai = count(array_filter($langkah, fn ($s) => $s['done']));
+
+        return response()->json([
+            'steps'         => $langkah,
+            'done'          => $selesai,
+            'total'         => count($langkah),
+            'complete'      => $selesai === count($langkah),
+            'academic_year' => $year,
+        ]);
+    }
+
     public function stats(Request $request)
     {
         $now = now();
