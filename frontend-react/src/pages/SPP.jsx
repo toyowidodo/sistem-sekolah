@@ -4,12 +4,11 @@ import {
     CreditCard, Settings, BarChart2, Search, RefreshCw, Zap,
     CheckCircle, XCircle, ChevronDown, FileText, AlertTriangle
 } from 'lucide-react';
-import Swal from 'sweetalert2';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import ModernSelect from '../components/ModernSelect';
+import { swal } from '../utils/swal';
 
-const swal = (opts) => swal({ ...opts });
 
 const MONTHS = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];

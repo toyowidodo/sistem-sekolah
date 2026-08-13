@@ -6,12 +6,12 @@ import {
     Star, AlertTriangle, BookOpen, GraduationCap, Users as UsersIcon,
     Coffee, Clock, MoreHorizontal, List, LayoutGrid
 } from 'lucide-react';
-import Swal from 'sweetalert2';
 import { useForm } from 'react-hook-form';
 import ModernSelect from '../components/ModernSelect';
 import ModernDatepicker from '../components/ModernDatepicker';
+import { swal } from '../utils/swal';
+import { useAuthStore } from '../store/authStore';
 
-const swal = (opts) => swal({ ...opts });
 
 const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -39,6 +39,18 @@ const labelClass = 'block text-xs font-semibold uppercase tracking-wider mb-1.5'
 const labelStyle = { color: 'var(--text-label)' };
 
 export default function AcademicCalendar() {
+    /**
+     * Kalender ini dibuka untuk semua peran — siswa, orang tua, dan guru perlu
+     * tahu jadwal ujian dan hari libur. Endpoint GET-nya memang sudah terbuka
+     * untuk semua user terautentikasi; yang belum ada cuma jalannya ke sini.
+     *
+     * Tapi tombol tambah/ubah/hapus harus disembunyikan dari yang tidak berhak.
+     * Tanpa ini mereka melihat tombol yang pasti dijawab 403 oleh server.
+     */
+    const user = useAuthStore(state => state.user);
+    const canManage = !!(user?.roles?.includes('Superadmin')
+        || user?.permissions?.includes('manage-academic'));
+
     const [events, setEvents]     = useState([]);
     const [month, setMonth]       = useState(new Date().getMonth());
     const [year, setYear]         = useState(new Date().getFullYear());
@@ -203,9 +215,11 @@ export default function AcademicCalendar() {
                         ))}
                     </div>
 
-                    <button onClick={() => openCreate('')} className="btn-primary">
-                        <PlusCircle size={13} /> Tambah Event
-                    </button>
+                    {canManage && (
+                        <button onClick={() => openCreate('')} className="btn-primary">
+                            <PlusCircle size={13} /> Tambah Event
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -253,7 +267,7 @@ export default function AcademicCalendar() {
                                         opacity: d.current ? 1 : 0.35
                                     }}
                                     onClick={() => { if (d.current) setSelectedDay(d.date); }}
-                                    onDoubleClick={() => { if (d.current) openCreate(d.date.toISOString().split('T')[0]); }}
+                                    onDoubleClick={() => { if (canManage && d.current) openCreate(d.date.toISOString().split('T')[0]); }}
                                 >
                                     {/* Day number */}
                                     <div className="flex items-center justify-between px-0.5">
@@ -273,7 +287,7 @@ export default function AcademicCalendar() {
                                                 <div key={evt.id}
                                                     className="px-1.5 py-0.5 rounded text-xs font-medium truncate cursor-pointer transition-all"
                                                     style={{ background: cfg.bg, color: cfg.color, borderLeft: `2px solid ${cfg.color}` }}
-                                                    onClick={e => { e.stopPropagation(); openEdit(evt); }}
+                                                    onClick={e => { e.stopPropagation(); if (canManage) openEdit(evt); }}
                                                     title={evt.title}>
                                                     {evt.title}
                                                 </div>
@@ -299,7 +313,7 @@ export default function AcademicCalendar() {
                         <div className="flex flex-col items-center justify-center py-16">
                             <Calendar size={32} style={{ color: 'var(--text-muted)', marginBottom: 8 }} />
                             <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Tidak ada event</p>
-                            <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Klik "Tambah Event" untuk membuat event baru</p>
+                            <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{canManage ? 'Klik "Tambah Event" untuk membuat event baru' : 'Belum ada agenda yang dijadwalkan pada bulan ini'}</p>
                         </div>
                     ) : (
                         <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
@@ -353,7 +367,7 @@ export default function AcademicCalendar() {
                                             </p>
                                         </div>
                                         {/* Actions */}
-                                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                                        <div className="flex items-center gap-1.5 flex-shrink-0" hidden={!canManage}>
                                             <button onClick={() => openEdit(evt)}
                                                 className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
                                                 style={{ background: 'rgba(99,102,241,0.1)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.2)' }}
@@ -389,10 +403,12 @@ export default function AcademicCalendar() {
                             <h3 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
                                 {selectedDay.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                             </h3>
-                            <button onClick={() => openCreate(selectedDay.toISOString().split('T')[0])}
-                                className="text-xs flex items-center gap-1 font-semibold" style={{ color: '#818cf8' }}>
-                                <PlusCircle size={12} /> Tambah
-                            </button>
+                            {canManage && (
+                                <button onClick={() => openCreate(selectedDay.toISOString().split('T')[0])}
+                                    className="text-xs flex items-center gap-1 font-semibold" style={{ color: '#818cf8' }}>
+                                    <PlusCircle size={12} /> Tambah
+                                </button>
+                            )}
                         </div>
                         {dayEvts.length === 0 ? (
                             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Tidak ada event di hari ini</p>
@@ -408,10 +424,12 @@ export default function AcademicCalendar() {
                                                 <p className="text-sm font-semibold" style={{ color: cfg.color }}>{evt.title}</p>
                                                 {evt.description && <p className="text-xs mt-0.5 line-clamp-1" style={{ color: cfg.color, opacity: 0.7 }}>{evt.description}</p>}
                                             </div>
-                                            <div className="flex gap-1">
-                                                <button onClick={() => openEdit(evt)} className="p-1 rounded" style={{ color: cfg.color }}><Edit size={12} /></button>
-                                                <button onClick={() => handleDelete(evt)} className="p-1 rounded" style={{ color: '#f87171' }}><Trash2 size={12} /></button>
-                                            </div>
+                                            {canManage && (
+                                                <div className="flex gap-1">
+                                                    <button onClick={() => openEdit(evt)} className="p-1 rounded" style={{ color: cfg.color }}><Edit size={12} /></button>
+                                                    <button onClick={() => handleDelete(evt)} className="p-1 rounded" style={{ color: '#f87171' }}><Trash2 size={12} /></button>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}

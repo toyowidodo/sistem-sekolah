@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { User, Mail, Lock, Shield, Edit3, Save, X, CheckCircle, Eye, EyeOff, Key } from 'lucide-react';
 import api from '../api/axios';
 import { useAuthStore } from '../store/authStore';
+import { swal } from '../utils/swal';
 
-const swal = (opts) => swal({ ...opts });
 
 const ROLE_CFG = {
     'Superadmin':    { color: '#f87171', bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.3)',   label: 'Superadmin' },

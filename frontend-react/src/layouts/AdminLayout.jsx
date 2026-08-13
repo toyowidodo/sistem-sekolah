@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, Wallet, LogOut, School, ChevronRight, Moon, Sun, ClipboardList, Megaphone, BookOpen, Shield, Award, CreditCard, CalendarDays, PackageSearch, Mail, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, Wallet, LogOut, School, ChevronRight, Moon, Sun, ClipboardList, Megaphone, BookOpen, Shield, Award, CreditCard, Calendar, CalendarDays, PackageSearch, Mail, Menu, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 import { useSettingsStore } from '../store/settingsStore';
@@ -57,7 +57,7 @@ export default function AdminLayout() {
 
         { section: 'Pendukung' },
         { name: 'Pengumuman',   path: '/announcements', icon: Megaphone },
-        { name: 'Kalender',     path: '/calendar',      icon: CalendarDays },
+        { name: 'Kalender Pendidikan', path: '/calendar', icon: CalendarDays },
         { name: 'Inventaris',   path: '/inventory',     icon: PackageSearch, requiredPermission: 'manage-inventory' },
         { name: 'Tata Persuratan', path: '/eoffice',    icon: Mail, requiredPermission: 'manage-eoffice' },
     ];
@@ -67,6 +67,7 @@ export default function AdminLayout() {
         { name: 'Rapor & Nilai',   path: '/my-grades',     icon: Award },
         { name: 'Tagihan SPP',     path: '/my-spp',        icon: CreditCard },
         { name: 'Jadwal Kelas',    path: '/my-schedules',  icon: CalendarDays },
+        { name: 'Kalender Pendidikan', path: '/calendar',  icon: Calendar },
     ];
 
     const parentItems = [
@@ -74,12 +75,14 @@ export default function AdminLayout() {
         { name: 'Nilai & Rapor',  path: '/anak/nilai',   icon: Award },
         { name: 'Absensi',        path: '/anak/absensi', icon: ClipboardList },
         { name: 'Tagihan SPP',    path: '/anak/spp',     icon: CreditCard },
+        { name: 'Kalender Pendidikan', path: '/calendar', icon: Calendar },
     ];
 
     const teacherItems = [
         { name: 'Dashboard Guru',   path: '/',             icon: LayoutDashboard, exact: true },
         { name: 'Jadwal Mengajar',  path: '/my-teaching',  icon: CalendarDays },
         { name: 'Kelas Perwalian',  path: '/my-homeroom',  icon: Users },
+        { name: 'Kalender Pendidikan', path: '/calendar', icon: Calendar },
     ];
 
     const superadminItems = [
