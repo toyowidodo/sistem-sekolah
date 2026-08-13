@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { isGuru, isOrangTua } from '../utils/roles';
+import CommandPalette from '../components/CommandPalette';
 
 export default function AdminLayout() {
     const { user, fetchUser, logout, isAuthenticated } = useAuthStore();
@@ -134,6 +135,9 @@ export default function AdminLayout() {
 
     return (
         <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
+
+            {/* Pencarian cepat lintas modul — dibuka dengan Ctrl+K dari mana saja */}
+            <CommandPalette />
 
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (

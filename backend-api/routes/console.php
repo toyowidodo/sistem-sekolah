@@ -21,6 +21,12 @@ Artisan::command('inspire', function () {
 |
 */
 
+// Cadangan database setiap dini hari, saat lalu lintas paling sepi.
+// Menyimpan 14 terakhir supaya kuota hosting tidak penuh.
+Schedule::command('backup:database --keep=14')
+    ->dailyAt('02:00')
+    ->withoutOverlapping();
+
 // Siswa alpha diberitahukan sore hari, setelah absensi harian selesai diinput
 Schedule::command('notify:attendance-alpha')
     ->weekdays()
