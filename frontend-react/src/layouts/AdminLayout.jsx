@@ -28,16 +28,34 @@ export default function AdminLayout() {
         navigate('/login');
     };
 
+    /**
+     * Urutan menu mengikuti ketergantungan data, bukan abjad atau kebiasaan.
+     *
+     * Sebelumnya "Data Siswa" ada di urutan kedua padahal mengisinya butuh Kelas
+     * yang tersembunyi di menu "Akademik" jauh di bawah — pengguna baru pasti
+     * tersangkut di situ. Menu bertanda `step` diberi nomor dan harus diisi
+     * berurutan; sisanya bisa dikerjakan kapan saja.
+     */
     const adminItems = [
         { name: 'Dashboard',    path: '/',              icon: LayoutDashboard, exact: true },
-        { name: 'Data Siswa',   path: '/students',      icon: Users, requiredPermission: 'manage-students' },
-        { name: 'Data Guru',    path: '/teachers',      icon: GraduationCap, requiredPermission: 'manage-teachers' },
-        { name: 'Keuangan',     path: '/finance',       icon: Wallet, requiredPermission: 'manage-finance' },
-        { name: 'SPP',          path: '/spp',           icon: CreditCard, requiredPermission: 'manage-spp' },
+
+        { section: 'Langkah Awal', hint: 'isi berurutan' },
+        // 1. Guru lebih dulu — dibutuhkan sebagai wali kelas & pengampu jadwal
+        { name: 'Data Guru',    path: '/teachers',      icon: GraduationCap, requiredPermission: 'manage-teachers', step: true },
+        // 2. Kelas, mapel, lalu jadwal (urut per tab di dalamnya)
+        { name: 'Akademik',     path: '/academic',      icon: BookOpen, requiredPermission: 'manage-academic', step: true },
+        // 3. Siswa baru bisa ditempatkan setelah kelas ada
+        { name: 'Data Siswa',   path: '/students',      icon: Users, requiredPermission: 'manage-students', step: true },
+        // 4. Nominal SPP ditentukan per tingkat kelas
+        { name: 'SPP',          path: '/spp',           icon: CreditCard, requiredPermission: 'manage-spp', step: true },
+
+        { section: 'Kegiatan Harian' },
         { name: 'Absensi',      path: '/attendance',    icon: ClipboardList, requiredPermission: 'manage-attendance' },
-        { name: 'Kedisiplinan', path: '/student-points', icon: Award, requiredPermission: 'manage-student-points' },
-        { name: 'Akademik',     path: '/academic',      icon: BookOpen, requiredPermission: 'manage-academic' },
         { name: 'Nilai & Rapor',path: '/grades',        icon: Award, requiredPermission: 'manage-grades' },
+        { name: 'Kedisiplinan', path: '/student-points', icon: Award, requiredPermission: 'manage-student-points' },
+        { name: 'Keuangan',     path: '/finance',       icon: Wallet, requiredPermission: 'manage-finance' },
+
+        { section: 'Pendukung' },
         { name: 'Pengumuman',   path: '/announcements', icon: Megaphone },
         { name: 'Kalender',     path: '/calendar',      icon: CalendarDays },
         { name: 'Inventaris',   path: '/inventory',     icon: PackageSearch, requiredPermission: 'manage-inventory' },
@@ -73,7 +91,15 @@ export default function AdminLayout() {
     const userPermissions = user?.permissions || [];
 
     const allowedAdminItems = adminItems.filter(item =>
-        isSuperadmin || !item.requiredPermission || userPermissions.includes(item.requiredPermission)
+        item.section || isSuperadmin || !item.requiredPermission || userPermissions.includes(item.requiredPermission)
+    );
+
+    /**
+     * Membuang judul kelompok yang tidak lagi punya menu di bawahnya — bisa
+     * terjadi kalau seluruh isinya tersaring oleh permission user.
+     */
+    const dropEmptySections = (items) => items.filter((item, i) =>
+        !item.section || items.slice(i + 1).find(n => n.section || n.name)?.name
     );
 
     const menuItems = isSiswa
@@ -82,8 +108,8 @@ export default function AdminLayout() {
             ? parentItems
             // Guru dapat menu portalnya sendiri di atas menu akademik biasa
             : isGuru(user)
-                ? [...teacherItems, ...allowedAdminItems.filter(item => !item.exact)]
-                : allowedAdminItems;
+                ? dropEmptySections([...teacherItems, ...allowedAdminItems.filter(item => !item.exact)])
+                : dropEmptySections(allowedAdminItems);
 
     const isActive = (item) =>
         item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path);
@@ -155,16 +181,52 @@ export default function AdminLayout() {
 
                 {/* Nav */}
                 <nav className="flex-1 py-4 space-y-1 relative z-10 overflow-y-auto">
-                    {menuItems.map((item, index) => {
-                        const active = isActive(item);
-                        return (
-                            <Link key={index} to={item.path} className={`sidebar-item ${active ? 'active' : ''}`}>
-                                <item.icon size={18} />
-                                <span className="flex-1">{item.name}</span>
-                                {active && <ChevronRight size={14} className="opacity-60" />}
-                            </Link>
-                        );
-                    })}
+                    {(() => {
+                        // Nomor langkah dihitung dari menu yang benar-benar tampil,
+                        // supaya tetap urut walau sebagian tersaring oleh permission
+                        let step = 0;
+
+                        return menuItems.map((item, index) => {
+                            if (item.section) {
+                                return (
+                                    <div key={`s-${index}`} className="px-4 pt-4 pb-1.5 flex items-baseline gap-2">
+                                        <span className="text-xs font-bold uppercase tracking-widest"
+                                            style={{ color: 'var(--text-muted)', fontSize: '9px' }}>
+                                            {item.section}
+                                        </span>
+                                        {item.hint && (
+                                            <span className="normal-case tracking-normal"
+                                                style={{ color: 'var(--text-muted)', fontSize: '9px', opacity: 0.7 }}>
+                                                {item.hint}
+                                            </span>
+                                        )}
+                                    </div>
+                                );
+                            }
+
+                            const active = isActive(item);
+                            const nomor = item.step ? ++step : null;
+
+                            return (
+                                <Link key={index} to={item.path} className={`sidebar-item ${active ? 'active' : ''}`}>
+                                    <item.icon size={18} />
+                                    <span className="flex-1">{item.name}</span>
+                                    {nomor && !active && (
+                                        <span className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
+                                            style={{
+                                                background: 'rgba(99,102,241,0.15)',
+                                                color: '#818cf8',
+                                                fontSize: '9px',
+                                                fontWeight: 700,
+                                            }}>
+                                            {nomor}
+                                        </span>
+                                    )}
+                                    {active && <ChevronRight size={14} className="opacity-60" />}
+                                </Link>
+                            );
+                        });
+                    })()}
 
                     {/* Superadmin divider */}
                     {user?.roles?.includes('Superadmin') && (
