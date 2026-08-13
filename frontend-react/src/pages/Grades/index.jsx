@@ -7,6 +7,7 @@ import TabRekap from './components/TabRekap';
 import TabRapor from './components/TabRapor';
 import { useAuthStore } from '../../store/authStore';
 import { isGuru } from '../../utils/roles';
+import EmptyState from '../../components/EmptyState';
 
 export default function Grades() {
     const [tab, setTab]           = useState('input');
@@ -78,9 +79,27 @@ export default function Grades() {
             />
 
             {/* Content */}
-            {tab === 'input' && <TabInputNilai classrooms={classrooms} subjects={subjects}/>}
-            {tab === 'rekap' && <TabRekap classrooms={classrooms}/>}
-            {tab === 'rapor' && <TabRapor/>}
+            {/* Tanpa kelas & mapel, seluruh tab di bawah hanya menampilkan dropdown
+                kosong tanpa penjelasan — jadi hentikan di sini dengan arahan */}
+            {classrooms.length === 0 || subjects.length === 0 ? (
+                <div className="rounded-2xl"
+                    style={{ background:'var(--bg-card)', border:'1px solid var(--border-card)' }}>
+                    <EmptyState
+                        icon={BookOpen}
+                        title={guru ? 'Anda belum mengampu kelas atau mapel apa pun' : 'Kelas dan mata pelajaran belum lengkap'}
+                        hint={guru
+                            ? 'Cakupan mengajar ditentukan dari jadwal pelajaran. Minta admin menambahkan Anda ke jadwal di menu Akademik → Jadwal.'
+                            : 'Input nilai membutuhkan kelas dan mata pelajaran. Lengkapi dulu di menu Akademik, lalu susun jadwal pelajarannya.'}
+                        action={guru ? undefined : { label: 'Buka menu Akademik', to: '/academic' }}
+                    />
+                </div>
+            ) : (
+                <>
+                    {tab === 'input' && <TabInputNilai classrooms={classrooms} subjects={subjects}/>}
+                    {tab === 'rekap' && <TabRekap classrooms={classrooms}/>}
+                    {tab === 'rapor' && <TabRapor/>}
+                </>
+            )}
         </div>
     );
 }

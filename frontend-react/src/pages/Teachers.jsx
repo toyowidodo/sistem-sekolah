@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import api from '../api/axios';
 import DataTable from '../components/DataTable';
+import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
 import { Edit, Trash2, PlusCircle, GraduationCap, Download, FileText, Upload } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -312,7 +313,16 @@ export default function Teachers() {
                 </div>
             </div>
 
-            <DataTable columns={columns} data={teachers} />
+            <DataTable columns={columns} data={teachers}
+                empty={
+                    <EmptyState
+                        icon={GraduationCap}
+                        title="Belum ada data guru"
+                        hint="Guru adalah langkah pertama: dibutuhkan sebagai wali kelas dan pengampu jadwal pelajaran. Setiap guru baru otomatis dibuatkan akun login."
+                        onAction={{ label: 'Tambah Guru', onClick: openCreateModal }}
+                    />
+                }
+            />
 
             {/* Modal Form */}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}

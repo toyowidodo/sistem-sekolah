@@ -10,7 +10,10 @@ export default function DataTable({
     page = 1,
     onPageChange,
     perPage = 10,
-    onPerPageChange
+    onPerPageChange,
+    // Ditampilkan saat data kosong. Isi dengan <EmptyState .../> agar pengguna
+    // tahu langkah apa yang terlewat, bukan sekadar "Tidak ada data".
+    empty
 }) {
     const [internalPage, setInternalPage] = useState(1);
     const [internalPerPage, setInternalPerPage] = useState(10);
@@ -25,6 +28,15 @@ export default function DataTable({
     }, [data?.length, internalPerPage, serverSide]);
 
     if (!data || data.length === 0) {
+        if (empty) {
+            return (
+                <div className="rounded-2xl"
+                    style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
+                    {empty}
+                </div>
+            );
+        }
+
         return (
             <div
                 className="rounded-2xl flex flex-col items-center justify-center py-16"

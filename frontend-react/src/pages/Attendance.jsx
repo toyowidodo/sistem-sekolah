@@ -6,6 +6,7 @@ import autoTable from 'jspdf-autotable';
 import Swal from 'sweetalert2';
 import ModernSelect from '../components/ModernSelect';
 import ModernDatepicker from '../components/ModernDatepicker';
+import EmptyState from '../components/EmptyState';
 
 const STATUS_CONFIG = {
     hadir: { label: 'Hadir',  color: '#34d399', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.25)', icon: CheckCircle },
@@ -270,11 +271,12 @@ export default function Attendance() {
                                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Memuat data...</p>
                             </div>
                         ) : rows.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-16">
-                                <ClipboardList size={32} style={{ color: 'var(--text-muted)', marginBottom: 8 }} />
-                                <p className="font-semibold text-sm" style={{ color: 'var(--text-secondary)' }}>Tidak ada data siswa</p>
-                                <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Pastikan data siswa sudah diinput</p>
-                            </div>
+                            <EmptyState
+                                icon={ClipboardList}
+                                title="Tidak ada siswa untuk diabsen"
+                                hint="Absensi mengambil siswa yang berstatus aktif. Kalau data siswa sudah ada tapi tetap kosong, kemungkinan besar siswanya belum ditempatkan ke kelas — gunakan tombol Tetapkan Kelas di halaman Data Siswa."
+                                action={{ label: 'Buka Data Siswa', to: '/students' }}
+                            />
                         ) : (
                             <>
                                 {/* Table Header */}

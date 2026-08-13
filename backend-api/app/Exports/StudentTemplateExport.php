@@ -22,7 +22,8 @@ class StudentTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, 
                 '081234567890',
                 'Jl. Merdeka No. 1',
                 'Islam',
-                'SMP Negeri 1',
+                'TK Tunas Bangsa',
+                '1A',
             ],
             [
                 '1001001002',
@@ -33,7 +34,8 @@ class StudentTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, 
                 '089876543210',
                 'Jl. Pahlawan No. 2',
                 'Islam',
-                'SMP Negeri 2',
+                'TK Harapan',
+                '1B',
             ]
         ];
     }
@@ -49,7 +51,11 @@ class StudentTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, 
             'no_hp',
             'alamat',
             'agama',
-            'asal_sekolah'
+            'asal_sekolah',
+            // Diisi nama kelas persis seperti di menu Akademik -> Kelas.
+            // Boleh dikosongkan; siswa bisa ditempatkan belakangan lewat
+            // tombol "Tetapkan Kelas" di halaman Data Siswa.
+            'kelas',
         ];
     }
 

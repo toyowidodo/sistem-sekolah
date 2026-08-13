@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 import { useForm } from 'react-hook-form';
 import ModernSelect from '../components/ModernSelect';
 import GuardianModal from './GuardianModal';
+import EmptyState from '../components/EmptyState';
 
 const labelClass = "block text-xs font-semibold uppercase tracking-wider mb-1.5";
 const labelStyle = { color: 'var(--text-label)' };
@@ -24,6 +25,8 @@ export default function Students() {
     const [history, setHistory] = useState([]);
     const [isGuardianOpen, setIsGuardianOpen] = useState(false);
     const [guardianStudent, setGuardianStudent] = useState(null);
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [bulkClassroom, setBulkClassroom] = useState('');
     const fileInputRef = useRef(null);
     
     const [formTab, setFormTab] = useState('pribadi');
@@ -251,7 +254,49 @@ export default function Students() {
         </button>
     );
 
+    const allOnPageSelected = students.length > 0 && students.every(s => selectedIds.includes(s.id));
+
+    const toggleAllOnPage = () => {
+        setSelectedIds(prev => allOnPageSelected
+            ? prev.filter(id => !students.some(s => s.id === id))
+            : [...new Set([...prev, ...students.map(s => s.id)])]);
+    };
+
+    const toggleOne = (id) => {
+        setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    };
+
+    const handleBulkAssign = async () => {
+        try {
+            const res = await api.post('/students/bulk-classroom', {
+                student_ids: selectedIds,
+                classroom_id: bulkClassroom || null,
+            });
+            Swal.fire({ title: 'Berhasil', text: res.data.message, icon: 'success', background: '#0d1526', color: '#e2e8f0' });
+            setSelectedIds([]);
+            setBulkClassroom('');
+            fetchStudents();
+        } catch (err) {
+            Swal.fire({
+                title: 'Gagal',
+                text: err.response?.data?.message || 'Gagal menetapkan kelas',
+                icon: 'error', background: '#0d1526', color: '#e2e8f0',
+            });
+        }
+    };
+
     const columns = [
+        {
+            header: (
+                <input type="checkbox" checked={allOnPageSelected} onChange={toggleAllOnPage}
+                    title="Pilih semua di halaman ini" className="cursor-pointer" />
+            ),
+            noPrint: true,
+            render: (row) => (
+                <input type="checkbox" checked={selectedIds.includes(row.id)}
+                    onChange={() => toggleOne(row.id)} className="cursor-pointer" />
+            ),
+        },
         { header: 'NISN', field: 'nisn' },
         { header: 'Nama Lengkap', field: 'name' },
         {
@@ -341,9 +386,42 @@ export default function Students() {
                 </div>
             </div>
 
-                <DataTable 
-                    columns={columns} 
-                    data={students} 
+                {/* Bilah aksi massal — muncul hanya saat ada yang dipilih */}
+                {selectedIds.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-3 px-4 py-3 rounded-xl no-print"
+                        style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)' }}>
+                        <span className="text-sm font-semibold" style={{ color: '#818cf8' }}>
+                            {selectedIds.length} siswa dipilih
+                        </span>
+                        <ModernSelect value={bulkClassroom} onChange={e => setBulkClassroom(e.target.value)}
+                            className="input-dark text-sm">
+                            <option value="">-- Keluarkan dari kelas --</option>
+                            {classrooms.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </ModernSelect>
+                        <button onClick={handleBulkAssign} className="btn-primary">Tetapkan Kelas</button>
+                        <button onClick={() => setSelectedIds([])} className="btn-ghost">Batal pilih</button>
+                        {classrooms.length === 0 && (
+                            <span className="text-xs" style={{ color: '#fbbf24' }}>
+                                Belum ada kelas — buat dulu di Akademik → Kelas.
+                            </span>
+                        )}
+                    </div>
+                )}
+
+                <DataTable
+                    columns={columns}
+                    data={students}
+                    empty={
+                        <EmptyState
+                            icon={Users}
+                            title="Belum ada data siswa"
+                            hint={classrooms.length === 0
+                                ? 'Buat kelas lebih dulu di menu Akademik, supaya siswa bisa langsung ditempatkan saat ditambahkan atau diimpor.'
+                                : 'Tambahkan siswa satu per satu, atau unduh template Excel lalu impor sekaligus — templatenya sudah punya kolom Kelas.'}
+                            action={classrooms.length === 0 ? { label: 'Buka menu Akademik', to: '/academic' } : undefined}
+                            onAction={classrooms.length > 0 ? { label: 'Tambah Siswa', onClick: openCreateModal } : undefined}
+                        />
+                    }
                     serverSide={true}
                     totalData={totalStudents}
                     page={currentPage}

@@ -62,8 +62,8 @@ class InventoryController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('inventories', 'public');
-            $validated['image'] = url('storage/' . $path);
+            // Simpan path relatifnya saja; URL dibangun oleh accessor di model
+            $validated['image'] = $request->file('image')->store('inventories', 'public');
         }
 
         $inventory = Inventory::create($validated);
@@ -88,12 +88,12 @@ class InventoryController extends Controller
 
         if ($request->hasFile('image')) {
             // Hapus gambar lama jika ada
-            if ($inventory->image && str_contains($inventory->image, 'storage/inventories')) {
-                $oldPath = str_replace(url('storage') . '/', '', $inventory->image);
-                Storage::disk('public')->delete($oldPath);
+            // getRawOriginal dipakai karena $inventory->image sudah berupa URL
+            // lengkap hasil accessor
+            if ($old = $inventory->getRawOriginal('image')) {
+                Storage::disk('public')->delete($old);
             }
-            $path = $request->file('image')->store('inventories', 'public');
-            $validated['image'] = url('storage/' . $path);
+            $validated['image'] = $request->file('image')->store('inventories', 'public');
         }
 
         $inventory->update($validated);
@@ -103,9 +103,8 @@ class InventoryController extends Controller
     public function destroy($id)
     {
         $inventory = Inventory::findOrFail($id);
-        if ($inventory->image && str_contains($inventory->image, 'storage/inventories')) {
-            $oldPath = str_replace(url('storage') . '/', '', $inventory->image);
-            Storage::disk('public')->delete($oldPath);
+        if ($old = $inventory->getRawOriginal('image')) {
+            Storage::disk('public')->delete($old);
         }
         $inventory->delete();
         return response()->json(['message' => 'Aset berhasil dihapus']);
