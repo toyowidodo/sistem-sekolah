@@ -56,6 +56,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | URL Aplikasi Frontend
+    |--------------------------------------------------------------------------
+    |
+    | Alamat antarmuka React. Dipakai untuk mengalihkan pengunjung yang salah
+    | membuka alamat API ke aplikasi yang benar.
+    |
+    */
+
+    'frontend_url' => env('FRONTEND_URL', 'https://niswa.online'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
