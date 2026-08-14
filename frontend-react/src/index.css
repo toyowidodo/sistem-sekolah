@@ -474,3 +474,76 @@
   font-weight: 600;
   letter-spacing: 0.01em;
 }
+
+/* Tombol tutup (×). Bawaannya #ccc — hanya 1.56:1 di atas modal terang,
+   praktis tidak terlihat.
+   Menyetel --swal2-close-button-color saja tidak cukup: SweetAlert
+   mendeklarasikan nilai defaultnya di blok yang menang urutan cascade.
+   Jadi properti color-nya ditimpa langsung.
+
+   --text-muted sempat dipakai, tapi di tema gelap hanya mencapai 3.83:1 —
+   masih di bawah ambang. --text-secondary memenuhi keduanya:
+   8.5 di terang, 7.11 di gelap. */
+:root div:where(.swal2-container) button:where(.swal2-close) {
+  color: var(--text-secondary);
+}
+:root div:where(.swal2-container) button:where(.swal2-close):hover {
+  color: var(--text-primary);
+}
+
+/* ── Ikon: hanya tema terang ──────────────────────────────────────────
+   Warna bawaan SweetAlert dirancang untuk modal putih pekat dan sangat
+   pucat: #f8bb86, #a5dc86, #f27474, #3fc3ee, #87adbd. Di modal terang
+   kita kontrasnya cuma 1.55–2.72 alias tidak terlihat.
+
+   Di tema GELAP warna itu justru sangat baik (6.5–11.4), jadi sengaja
+   TIDAK diubah — kalau diseragamkan, ikonnya malah hilang di sana.
+
+   Selector diawali :root[data-theme="light"] agar spesifisitasnya
+   melampaui aturan SweetAlert yang memakai :where().
+   Nilai baru terhadap modal terang #fbfcfe:
+     warning  #b45309  4.89      info      #0369a1  5.78
+     error    #dc2626  4.70      question  #475569  7.38
+     success  #047857  5.34
+   ------------------------------------------------------------------- */
+:root[data-theme="light"] div:where(.swal2-icon).swal2-warning {
+  border-color: #b45309;
+  color: #b45309;
+}
+:root[data-theme="light"] div:where(.swal2-icon).swal2-error {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+:root[data-theme="light"] div:where(.swal2-icon).swal2-error [class^="swal2-x-mark-line"] {
+  background-color: #dc2626;
+}
+:root[data-theme="light"] div:where(.swal2-icon).swal2-success {
+  border-color: #047857;
+  color: #047857;
+}
+:root[data-theme="light"] div:where(.swal2-icon).swal2-success [class^="swal2-success-line"] {
+  background-color: #047857;
+}
+:root[data-theme="light"] div:where(.swal2-icon).swal2-success .swal2-success-ring {
+  border-color: rgba(4, 120, 87, 0.3);
+}
+:root[data-theme="light"] div:where(.swal2-icon).swal2-info {
+  border-color: #0369a1;
+  color: #0369a1;
+}
+:root[data-theme="light"] div:where(.swal2-icon).swal2-question {
+  border-color: #475569;
+  color: #475569;
+}
+
+/* Force button text colors for clarity across themes */
+:root div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
+  color: #ffffff; /* Ensure confirm text is always readable on colored backgrounds */
+}
+
+:root div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel,
+:root div:where(.swal2-container) button:where(.swal2-styled).swal2-deny {
+  color: var(--text-primary); /* Cancel/deny use app primary text for contrast */
+  background: transparent;
+  border: 1px solid var(--border-btn-ghost);
+}

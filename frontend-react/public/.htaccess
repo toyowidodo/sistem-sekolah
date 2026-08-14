@@ -12,6 +12,16 @@
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
+    # Aset ber-hash yang tidak ada HARUS 404, jangan dilayani index.html.
+    #
+    # Tanpa aturan ini, browser yang masih memegang index.html lama meminta
+    # bundle yang sudah terhapus dan menerima HTML dengan status 200. Browser
+    # lalu mencoba menjalankan HTML itu sebagai modul JavaScript, gagal parse,
+    # dan aplikasi tidak pernah boot — layar jadi hitam tanpa pesan apa pun.
+    # 404 membuat kegagalannya kelihatan, bukan senyap.
+    RewriteCond %{REQUEST_URI} ^/assets/
+    RewriteRule ^ - [L,R=404]
+
     RewriteRule ^ index.html [L]
 </IfModule>
 
