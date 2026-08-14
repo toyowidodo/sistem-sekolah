@@ -69,7 +69,7 @@ export default function TabAssets({ onQuickLoan }) {
 
     const handleDelete = (a) => swal({
         title: `Hapus ${a.name}?`, icon: 'warning', showCancelButton: true,
-        confirmButtonColor: '#ef4444', confirmButtonText: 'Hapus'
+        confirmButtonColor: '#dc2626', confirmButtonText: 'Hapus'
     }).then(async r => { if (r.isConfirmed) { await api.delete(`/inventories/${a.id}`); fetchAssets(); } });
 
     const handleScanSuccess = (decodedText) => {

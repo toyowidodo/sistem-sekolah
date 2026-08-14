@@ -137,7 +137,7 @@ export default function AcademicCalendar() {
 
     const handleDelete = (evt) => swal({
         title: `Hapus "${evt.title}"?`, icon: 'warning', showCancelButton: true,
-        confirmButtonColor: '#ef4444',
+        confirmButtonColor: '#dc2626',
         confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal'
     }).then(async r => {
         if (r.isConfirmed) {
