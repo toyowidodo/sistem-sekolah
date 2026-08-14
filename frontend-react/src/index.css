@@ -423,3 +423,54 @@
     print-color-adjust: exact;
   }
 }
+
+/* ============================================
+   SWEETALERT2 — THEME INTEGRATION
+   Override SweetAlert2's internal CSS variables so popups always
+   match the active app theme, regardless of OS prefers-color-scheme.
+   ============================================ */
+:root,
+:root[data-theme="dark"] {
+  --swal2-background: var(--bg-modal);
+  --swal2-color: var(--text-primary);
+  --swal2-border-radius: 1rem;
+  --swal2-backdrop: rgba(0, 0, 0, 0.55);
+}
+:root[data-theme="light"] {
+  --swal2-background: var(--bg-modal);
+  --swal2-color: var(--text-primary);
+}
+
+/* Aturan di bawah diawali :root bukan tanpa alasan.
+   SweetAlert memakai selector :where() yang berspesifisitas nol, sehingga
+   aturannya hanya (0,0,2) — sama persis dengan aturan kita. Karena CSS-nya
+   disuntikkan ke <head> saat runtime, urutannya berada SETELAH stylesheet
+   aplikasi dan memenangkan seri.
+   Akibatnya sebelum ini border, radius, dan warna keterangan tidak pernah
+   diterapkan: popup tetap 5px di tema terang dan 0px border.
+   Awalan :root menambah (0,1,0) sehingga aturan kita menang tanpa !important. */
+
+/* Popup extra polish to match app card style */
+:root div:where(.swal2-container) div:where(.swal2-popup) {
+  border: 1px solid var(--border-modal);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-modal);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Title — explicit color for extra safety */
+:root div:where(.swal2-container) h2:where(.swal2-title) {
+  color: var(--text-primary);
+}
+
+/* HTML container (subtitle/text) */
+:root div:where(.swal2-container) div:where(.swal2-html-container) {
+  color: var(--text-secondary);
+}
+
+/* Buttons — match app's border-radius */
+:root div:where(.swal2-container) button:where(.swal2-styled) {
+  border-radius: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
