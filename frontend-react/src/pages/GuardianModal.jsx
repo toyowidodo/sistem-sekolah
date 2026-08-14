@@ -76,7 +76,7 @@ export default function GuardianModal({ student, isOpen, onClose }) {
         title: `Putuskan akses ${g.name}?`,
         text: 'Akun ini tidak akan bisa lagi melihat data siswa tersebut.',
         icon: 'warning', showCancelButton: true,
-        confirmButtonColor: '#ef4444',
+        confirmButtonColor: '#dc2626',
         confirmButtonText: 'Ya, Putuskan', cancelButtonText: 'Batal'
     }).then(async r => {
         if (!r.isConfirmed) return;

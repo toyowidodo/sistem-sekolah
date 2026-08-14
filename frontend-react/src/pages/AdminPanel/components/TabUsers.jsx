@@ -48,7 +48,7 @@ export default function TabUsers() {
         title: `Hapus user "${name}"?`,
         text: 'Semua token user akan dicabut!',
         icon: 'warning', showCancelButton: true,
-        confirmButtonColor: '#ef4444',
+        confirmButtonColor: '#dc2626',
         confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal',
     }).then(async r => {
         if (r.isConfirmed) {
@@ -63,7 +63,7 @@ export default function TabUsers() {
             ? 'User tidak akan bisa login lagi dan sesinya yang sedang berjalan dihentikan.'
             : 'User akan bisa login kembali seperti biasa.',
         icon: 'warning', showCancelButton: true,
-        confirmButtonColor: u.is_active ? '#ef4444' : '#10b981',
+        confirmButtonColor: u.is_active ? '#dc2626' : '#047857',
         confirmButtonText: u.is_active ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan', cancelButtonText: 'Batal',
     }).then(async r => {
         if (!r.isConfirmed) return;
@@ -78,7 +78,7 @@ export default function TabUsers() {
         title: `Hentikan sesi "${u.name}"?`,
         text: 'Semua token login user ini dicabut. User bisa login lagi setelahnya.',
         icon: 'warning', showCancelButton: true,
-        confirmButtonColor: '#f59e0b',
+        confirmButtonColor: '#b45309',
         confirmButtonText: 'Ya, Paksa Logout', cancelButtonText: 'Batal',
     }).then(async r => {
         if (!r.isConfirmed) return;

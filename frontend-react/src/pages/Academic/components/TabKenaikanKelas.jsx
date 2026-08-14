@@ -107,7 +107,7 @@ export default function TabKenaikanKelas({ classrooms = [] }) {
                    <p style="margin-top:8px">Dari <b>${fromYear}</b> ke <b>${toYear}</b>.</p>
                    <p style="margin-top:8px;font-size:13px;opacity:.75">Siswa yang lulus atau keluar akan dinonaktifkan dan dikeluarkan dari kelas.</p>`,
             icon: 'warning', showCancelButton: true,
-            confirmButtonColor: '#10b981',
+            confirmButtonColor: '#047857',
             confirmButtonText: 'Ya, Jalankan', cancelButtonText: 'Batal',
         });
         if (!confirm.isConfirmed) return;

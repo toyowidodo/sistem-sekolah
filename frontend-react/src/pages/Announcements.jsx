@@ -120,7 +120,7 @@ export default function Announcements() {
             text: 'Data tidak bisa dikembalikan!',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ef4444',
+            confirmButtonColor: '#dc2626',
             confirmButtonText: 'Ya, Hapus!',
             cancelButtonText: 'Batal'
         }).then(async (result) => {

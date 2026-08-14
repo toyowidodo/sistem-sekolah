@@ -30,6 +30,12 @@ export const swal = (opts = {}) => Swal.fire({
     confirmButtonColor: '#4f46e5',  // 6.29:1
     cancelButtonColor: '#64748b',   // 4.76:1
 
+    // Label bawaan SweetAlert berbahasa Inggris. Dialog yang lupa menyetelnya
+    // sendiri menampilkan "Cancel" di tengah antarmuka berbahasa Indonesia —
+    // terjadi di tiga dialog modul Inventaris.
+    confirmButtonText: 'Ya',
+    cancelButtonText: 'Batal',
+
     ...opts,
 });
 

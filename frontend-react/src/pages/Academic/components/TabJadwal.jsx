@@ -47,7 +47,7 @@ export default function TabJadwal({ teachers }) {
 
     const handleDelete = (id) => swal({
         title:'Hapus jadwal?', icon:'warning', showCancelButton:true,
-        confirmButtonColor:'#ef4444',
+        confirmButtonColor:'#dc2626',
         confirmButtonText:'Ya, Hapus!', cancelButtonText:'Batal',
     }).then(async r => { if (r.isConfirmed) { await api.delete(`/schedules/${id}`); fetchAll(); } });
 

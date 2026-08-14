@@ -69,7 +69,7 @@ function TabTagihan() {
             html: `Buat tagihan SPP untuk <b>${MONTHS[month]} ${year}</b>?<br/>
                    <small class="opacity-60">Siswa yang sudah punya tagihan bulan ini akan dilewati.</small>`,
             icon: 'question', showCancelButton: true,
-            confirmButtonColor: '#6366f1',
+            confirmButtonColor: '#4f46e5',
             confirmButtonText: 'Ya, Generate!', cancelButtonText: 'Batal'
         });
         if (!res.isConfirmed) return;
@@ -91,7 +91,7 @@ function TabTagihan() {
             input: 'text', inputLabel: 'Diterima oleh',
             inputPlaceholder: 'Nama petugas penerima...',
             showCancelButton: true,
-            confirmButtonColor: '#34d399',
+            confirmButtonColor: '#047857',
             confirmButtonText: 'Konfirmasi Lunas', cancelButtonText: 'Batal'
         });
         if (!res.isConfirmed) return;
@@ -110,7 +110,7 @@ function TabTagihan() {
             title: 'Batalkan Pelunasan?',
             text: `Status ${bill.student_name} akan kembali ke "Belum Lunas"`,
             icon: 'warning', showCancelButton: true,
-            confirmButtonColor: '#ef4444',
+            confirmButtonColor: '#dc2626',
             confirmButtonText: 'Ya, Batalkan', cancelButtonText: 'Batal'
         });
         if (!res.isConfirmed) return;
