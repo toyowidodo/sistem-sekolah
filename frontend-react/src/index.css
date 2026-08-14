@@ -536,14 +536,33 @@
   color: #475569;
 }
 
-/* Force button text colors for clarity across themes */
+/* Latar tombol harus kita deklarasikan sendiri, jangan diwariskan dari
+ * SweetAlert. CSS SweetAlert disuntikkan saat runtime sebagai <style> di awal
+ * <head>, dan deklarasi background-color-nya kalah di kaskade — hasil ukur di
+ * halaman live: tombol konfirmasi rgba(0,0,0,0) alias transparan. Digabung
+ * dengan teks putih, tombol "Ya, Hapus!" jadi putih di atas popup putih,
+ * kontras 1.05:1 — tidak terlihat sama sekali di tema terang.
+ *
+ * var() tetap dipakai supaya warna per-dialog (mis. merah untuk hapus) masih
+ * berlaku; nilai kedua hanya jaring pengaman kalau propertinya tidak diset.
+ */
 :root div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
-  color: #ffffff; /* Ensure confirm text is always readable on colored backgrounds */
+  background-color: var(--swal2-confirm-button-background-color, #4f46e5);
+  color: #ffffff;
+  border: 1px solid transparent;
 }
 
-:root div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel,
 :root div:where(.swal2-container) button:where(.swal2-styled).swal2-deny {
-  color: var(--text-primary); /* Cancel/deny use app primary text for contrast */
-  background: transparent;
-  border: 1px solid var(--border-btn-ghost);
+  background-color: var(--swal2-deny-button-background-color, #dc2626);
+  color: #ffffff;
+  border: 1px solid transparent;
+}
+
+/* Batal sengaja berlatar penuh, bukan ghost. Ghost bergantung pada border tipis
+ * yang harus kontras di dua tema sekaligus; slate-500 terbaca di keduanya
+ * (putih di atasnya 4.76:1) tanpa syarat tambahan. */
+:root div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel {
+  background-color: var(--swal2-cancel-button-background-color, #64748b);
+  color: #ffffff;
+  border: 1px solid transparent;
 }
