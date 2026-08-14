@@ -31,6 +31,11 @@ export default function CommandPalette() {
     /* ── Ctrl+K membuka, Esc menutup ── */
     useEffect(() => {
         const onKey = (e) => {
+            // e.key bisa undefined pada event sintetis tertentu (mis. autofill
+            // pengelola kata sandi). Tanpa penjagaan ini, toLowerCase() melempar
+            // TypeError setiap kali event semacam itu terjadi.
+            if (!e.key) return;
+
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
                 e.preventDefault();
                 setOpen(o => !o);
