@@ -39,3 +39,6 @@ assets/
 /.htaccess
 /favicon.svg
 /icons.svg
+
+# Cadangan database produksi — berisi data siswa sungguhan, jangan pernah masuk repo.
+cadangan-produksi/
