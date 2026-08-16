@@ -110,6 +110,43 @@ class InventoryController extends Controller
         return response()->json(['message' => 'Aset berhasil dihapus']);
     }
 
+    /**
+     * Ambil satu aset berdasarkan kode yang dipindai.
+     *
+     * Sengaja jadi endpoint sendiri, bukan mencocokkan di sisi klien. index()
+     * menerapkan filter kategori dan pencarian, jadi mencari hasil pindaian di
+     * daftar yang sudah tersaring membuat barang yang sah dilaporkan "tidak
+     * ditemukan" hanya karena kebetulan ada filter aktif.
+     *
+     * Kode dikirim lewat query string, bukan segmen path, supaya kode yang
+     * mengandung titik atau garis miring tetap terbaca utuh.
+     */
+    public function lookup(Request $request)
+    {
+        $validated = $request->validate([
+            'code' => 'required|string|max:255',
+        ]);
+
+        $inventory = Inventory::withCount([
+                'loans as active_loans' => fn ($q) => $q->where('status', 'dipinjam'),
+            ])
+            ->where('item_code', $validated['code'])
+            ->first();
+
+        if (! $inventory) {
+            return response()->json([
+                'message' => "Barang dengan kode {$validated['code']} tidak ditemukan.",
+            ], 404);
+        }
+
+        // Satu baris peminjaman mewakili satu unit — inventory_loans tidak
+        // menyimpan jumlah. Dijaga agar tidak negatif, karena storeLoan belum
+        // membatasi peminjaman terhadap stok yang tersisa.
+        $inventory->available_units = max(0, $inventory->quantity - $inventory->active_loans);
+
+        return response()->json(['data' => $inventory]);
+    }
+
     // Loans
     public function loans(Request $request)
     {
