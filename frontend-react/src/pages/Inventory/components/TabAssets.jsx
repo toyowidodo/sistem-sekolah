@@ -8,7 +8,7 @@ import {
     CheckCircle, Archive, Monitor, Book, Paperclip, Wrench, ShieldAlert, QrCode, ScanLine, Printer, Eye
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { swal, CAT_CFG, COND_CFG, fmtPrice } from './Shared';
+import { swal, CAT_CFG, COND_CFG, fmtPrice, fmtDate, esc } from './Shared';
 import ModernSelect from '../../../components/ModernSelect';
 import ModernDatepicker from '../../../components/ModernDatepicker';
 
@@ -72,24 +72,61 @@ export default function TabAssets({ onQuickLoan }) {
         confirmButtonColor: '#dc2626', confirmButtonText: 'Hapus'
     }).then(async r => { if (r.isConfirmed) { await api.delete(`/inventories/${a.id}`); fetchAssets(); } });
 
-    const handleScanSuccess = (decodedText) => {
-        const item = assets.find(a => a.item_code === decodedText);
-        if (item) {
-            swal({
-                title: 'QR Code Ditemukan!',
-                html: `Barang: <b>${item.name}</b><br/>Status: <b>${COND_CFG[item.condition].label}</b>`,
-                icon: 'success', showCancelButton: true,
-                confirmButtonText: 'Pinjamkan', cancelButtonText: 'Tutup'
-            }).then(r => {
-                if (r.isConfirmed && item.condition === 'baik') {
-                    onQuickLoan(item);
-                } else if (r.isConfirmed && item.condition !== 'baik') {
-                    swal({ title: 'Gagal', text: 'Barang tidak dalam kondisi baik, tidak bisa dipinjam.', icon: 'error' });
-                }
+    const handleScanSuccess = async (decodedText) => {
+        // Dicari lewat server, bukan di dalam `assets`. Daftar itu sudah
+        // tersaring filter kategori dan pencarian, jadi mencocokkan di sana
+        // membuat barang yang sah dilaporkan "tidak ditemukan" begitu ada
+        // filter aktif — persis situasi yang paling sering terjadi saat orang
+        // memindai sambil menelusuri daftar.
+        let item;
+        try {
+            const r = await api.get('/inventories/lookup', { params: { code: decodedText } });
+            item = r.data.data;
+        } catch (e) {
+            return swal({
+                title: 'Tidak Ditemukan',
+                text: e.response?.data?.message || `Barang dengan kode ${decodedText} tidak ditemukan.`,
+                icon: 'error',
             });
-        } else {
-            swal({ title: 'Tidak Ditemukan', text: `Barang dengan kode ${decodedText} tidak ditemukan.`, icon: 'error' });
         }
+
+        const cond      = COND_CFG[item.condition] || COND_CFG.baik;
+        const tersedia  = item.available_units ?? 0;
+        const habis     = tersedia === 0;
+        const bisaPinjam = item.condition === 'baik' && !habis;
+
+        // Label memakai --text-secondary, bukan --text-muted: yang terakhir
+        // beralfa 0.65 dan hanya mencapai 2.33:1 di tema gelap.
+        const baris = (label, nilai, warna) => `
+            <div style="display:flex;justify-content:space-between;gap:1rem;padding:.5rem 0;
+                        border-bottom:1px solid var(--border)">
+                <span style="color:var(--text-secondary)">${label}</span>
+                <span style="font-weight:600;text-align:right;color:${warna || 'var(--text-primary)'}">${nilai}</span>
+            </div>`;
+
+        const html = `
+            <div style="text-align:left;font-size:.875rem">
+                <p style="font-weight:700;font-size:1rem;margin-bottom:.25rem;color:var(--text-primary)">${esc(item.name)}</p>
+                <p style="color:var(--text-secondary);font-size:.75rem;margin-bottom:.75rem">${esc(item.item_code)}</p>
+                ${baris('Lokasi', esc(item.location) || '&mdash;')}
+                ${baris('Harga satuan', item.price ? fmtPrice(item.price) : '&mdash;')}
+                ${baris('Tanggal pembelian', fmtDate(item.purchase_date) || '&mdash;')}
+                ${baris('Unit tersedia', `${tersedia} dari ${item.quantity}`,
+                        habis ? 'var(--status-bad)' : 'var(--status-ok)')}
+                ${baris('Kondisi', cond.label, cond.text)}
+            </div>`;
+
+        const r = await swal({
+            title: 'Barang Ditemukan',
+            html,
+            icon: bisaPinjam ? 'success' : 'warning',
+            showCancelButton: true,
+            showConfirmButton: bisaPinjam,
+            confirmButtonText: 'Pinjamkan',
+            cancelButtonText: 'Tutup',
+        });
+
+        if (r.isConfirmed) onQuickLoan(item);
     };
 
     return (

@@ -78,6 +78,17 @@
   --clock-bg: rgba(255,255,255,0.04);
   --clock-border: rgba(255,255,255,0.07);
   --clock-text: rgba(148,163,184,0.8);
+
+  /* Warna status untuk TEKS POLOS di atas kartu atau modal.
+   *
+   * Berbeda dari warna di CAT_CFG/COND_CFG, yang dipakai pada badge berlatar
+   * tint dan karena itu boleh lebih cerah. Dipakai sebagai teks biasa di atas
+   * latar terang, warna badge itu jatuh jauh di bawah ambang: hijau #10b981
+   * hanya 2.47:1 dan kuning #f59e0b 2.09:1. Nilai di sini diukur ≥4.8:1 pada
+   * kedua tema. */
+  --status-ok:   #34d399;  /* 9.48:1 */
+  --status-warn: #fbbf24;  /* 10.92:1 */
+  --status-bad:  #f87171;  /* 6.59:1 */
 }
 
 /* ============================================
@@ -162,6 +173,11 @@
   --clock-bg: rgba(0,0,0,0.04);
   --clock-border: rgba(0,0,0,0.07);
   --clock-text: #64748b;
+
+  /* Warna status teks polos — lihat catatan di blok tema gelap. */
+  --status-ok:   #047857;  /* 5.34:1 */
+  --status-warn: #b45309;  /* 4.89:1 */
+  --status-bad:  #b91c1c;  /* 6.30:1 */
 }
 
 /* ============================================

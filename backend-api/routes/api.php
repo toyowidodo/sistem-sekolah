@@ -158,6 +158,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Modul Inventaris
     Route::middleware('permission:manage-inventory')->group(function () {
         Route::get('inventories', [InventoryController::class, 'index']);
+        // Didaftarkan sebelum rute ber-parameter lain agar 'lookup' tidak
+        // tertangkap sebagai {id}.
+        Route::get('inventories/lookup', [InventoryController::class, 'lookup']);
         Route::post('inventories', [InventoryController::class, 'store']);
         Route::put('inventories/{id}', [InventoryController::class, 'update']);
         Route::delete('inventories/{id}', [InventoryController::class, 'destroy']);
